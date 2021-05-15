@@ -224,7 +224,7 @@ void RosalinaMenu_ChangeScreenBrightness(void)
 
         posY = Draw_DrawString(10, posY, COLOR_RED, "ADVERTENCIA: \n");
         posY = Draw_DrawString(10, posY, COLOR_WHITE, "  * El valor estara limitado por los\najustes preestablecidos.\n");
-        posY = Draw_DrawString(10, posY, COLOR_WHITE, "  * bottom framebuffer will be restored until\nyou exit.");
+        posY = Draw_DrawString(10, posY, COLOR_WHITE, "  * El framebuffer inferior se restaurara\ncuando salgas.");
         Draw_FlushFramebuffer();
         Draw_Unlock();
 
