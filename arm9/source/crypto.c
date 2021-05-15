@@ -603,7 +603,7 @@ void kernel9Loader(Arm9Bin *arm9Section)
     aes_use_keyslot(arm9BinSlot);
     aes(startOfArm9Bin, startOfArm9Bin, arm9SectionSize / AES_BLOCK_SIZE, arm9BinCtr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
 
-    if(*startOfArm9Bin != 0x47704770 && *startOfArm9Bin != 0xB0862000) error("Failed to decrypt the Arm9 binary.");
+    if(*startOfArm9Bin != 0x47704770 && *startOfArm9Bin != 0xB0862000) error("Fallo al desencriptar el binario Arm9.");
 }
 
 void computePinHash(u8 *outbuf, const u8 *inbuf)
