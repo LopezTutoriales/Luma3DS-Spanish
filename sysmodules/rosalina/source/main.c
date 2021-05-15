@@ -89,8 +89,8 @@ void initSystem(void)
     menuCombo = out == 0 ? DEFAULT_MENU_COMBO : (u32)out;
 
     miscellaneousMenu.items[0].title = Luma_SharedConfig->hbldr_3dsx_tid == HBLDR_DEFAULT_3DSX_TID ?
-        "Switch the hb. title to the current app." :
-        "Switch the hb. title to hblauncher_loader";
+        "Cambiar esta aplicacion por Homebrew L." :
+        "Cambiar hblauncher_loader por Homebrew L.";
 
     for(res = 0xD88007FA; res == (Result)0xD88007FA; svcSleepThread(500 * 1000LL))
     {

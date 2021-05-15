@@ -105,18 +105,18 @@ static void ScreenFiltersMenu_SetCct(int cct)
 }
 
 Menu screenFiltersMenu = {
-    "Screen filters menu",
+    "Menu filtros de pantalla",
     {
-        { "[6500K] Default", METHOD, .method = &ScreenFiltersMenu_SetDefault },
-        { "[10000K] Aquarium", METHOD, .method = &ScreenFiltersMenu_SetAquarium },
-        { "[7500K] Overcast Sky", METHOD, .method = &ScreenFiltersMenu_SetOvercastSky },
-        { "[5500K] Daylight", METHOD, .method = &ScreenFiltersMenu_SetDaylight },
-        { "[4200K] Fluorescent", METHOD, .method = &ScreenFiltersMenu_SetFluorescent },
-        { "[3400K] Halogen", METHOD, .method = &ScreenFiltersMenu_SetHalogen },
-        { "[2700K] Incandescent", METHOD, .method = &ScreenFiltersMenu_SetIncandescent },
-        { "[2300K] Warm Incandescent", METHOD, .method = &ScreenFiltersMenu_SetWarmIncandescent },
-        { "[1900K] Candle", METHOD, .method = &ScreenFiltersMenu_SetCandle },
-        { "[1200K] Ember", METHOD, .method = &ScreenFiltersMenu_SetEmber },
+        { "[6500K]  Por defecto", METHOD, .method = &ScreenFiltersMenu_SetDefault },
+        { "[10000K] Acuario", METHOD, .method = &ScreenFiltersMenu_SetAquarium },
+        { "[7500K]  Cielo nublado", METHOD, .method = &ScreenFiltersMenu_SetOvercastSky },
+        { "[5500K]  Luz", METHOD, .method = &ScreenFiltersMenu_SetDaylight },
+        { "[4200K]  Fluorescente", METHOD, .method = &ScreenFiltersMenu_SetFluorescent },
+        { "[3400K]  Halogeno", METHOD, .method = &ScreenFiltersMenu_SetHalogen },
+        { "[2700K]  Incandescente", METHOD, .method = &ScreenFiltersMenu_SetIncandescent },
+        { "[2300K]  Incandescente calido", METHOD, .method = &ScreenFiltersMenu_SetWarmIncandescent },
+        { "[1900K]  Vela", METHOD, .method = &ScreenFiltersMenu_SetCandle },
+        { "[1200K]  Ascua", METHOD, .method = &ScreenFiltersMenu_SetEmber },
         {},
     }
 };
