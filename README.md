@@ -7,7 +7,7 @@
 También le permite ejecutar contenido no autorizado ("homebrew") eliminando los controles de firma.
 Para usarlo, necesitará una consola capaz de ejecutar software homebrew en el procesador Arm9.
 
-Desde la versión 8.0, Luma3DS tiene su propio menú en el juego, que se puede activar con <kbd> L + Abajo + Seleccionar </kbd> (consulte las [notas de la versión] (https://github.com/LumaTeam/Luma3DS/releases/tag/v8.0)).
+Desde la versión 8.0, Luma3DS tiene su propio menú en el juego, que se puede activar con <kbd> L + Abajo + Select </kbd> (consulte las [notas de la versión] (https://github.com/LumaTeam/Luma3DS/releases/tag/v8.0)).
 
 #
 ### Compilación
