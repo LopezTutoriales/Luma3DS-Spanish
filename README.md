@@ -1,36 +1,36 @@
 # Luma3DS
-*Noob-proof (N)3DS "Custom Firmware"*
+* "Firmware personalizado" (N)3DS a prueba de novatos *
 
-### What it is
-**Luma3DS** is a program to patch the system software of (New) Nintendo (2)3DS handheld consoles "on the fly", adding features such as per-game language settings, debugging capabilities for developers, and removing restrictions enforced by Nintendo such as the region lock.
+### Lo que es
+** Luma3DS ** es un programa para parchear el software del sistema de las (nuevas) consolas portátiles Nintendo (2) 3DS "sobre la marcha", agregando funciones como configuraciones de idioma por juego, capacidades de depuración para desarrolladores y eliminando restricciones impuestas por Nintendo como el bloqueo de la región.
 
-It also allows you to run unauthorized ("homebrew") content by removing signature checks.
-To use it, you will need a console capable of running homebrew software on the Arm9 processor.
+También le permite ejecutar contenido no autorizado ("homebrew") eliminando los controles de firma.
+Para usarlo, necesitará una consola capaz de ejecutar software homebrew en el procesador Arm9.
 
-Since v8.0, Luma3DS has its own in-game menu, triggerable by <kbd>L+Down+Select</kbd> (see the [release notes](https://github.com/LumaTeam/Luma3DS/releases/tag/v8.0)).
+Desde la versión 8.0, Luma3DS tiene su propio menú en el juego, que se puede activar con <kbd> L + Abajo + Seleccionar </kbd> (consulte las [notas de la versión] (https://github.com/LumaTeam/Luma3DS/releases/tag/v8.0)).
 
 #
-### Compiling
-* Prerequisites
+### Compilación
+* Requisitos previos
     1. git
-    2. [makerom](https://github.com/jakcron/Project_CTR) in PATH
-    3. [firmtool](https://github.com/TuxSH/firmtool)
-    4. Up-to-date devkitARM+libctru
-1. Clone the repository with `git clone https://github.com/LumaTeam/Luma3DS.git`
-2. Run `make`.
+    2. [makerom] (https://github.com/jakcron/Project_CTR) en PATH
+    3. [firmtool] (https://github.com/TuxSH/firmtool)
+    4. DevkitARM + libctru actualizado
+1. Clone el repositorio con `git clone https://github.com/LumaTeam/Luma3DS.git`
+2. Ejecute `make`.
 
-    The produced `boot.firm` is meant to be copied to the root of your SD card for usage with Boot9Strap.
-
-#
-### Setup / Usage / Features
-See https://github.com/LumaTeam/Luma3DS/wiki
+    El "boot.firm" producido está destinado a ser copiado a la raíz de su tarjeta SD para su uso con Boot9Strap.
 
 #
-### Credits
-See https://github.com/LumaTeam/Luma3DS/wiki/Credits
+### Configuración / Uso / Funciones
+Ver https://github.com/LumaTeam/Luma3DS/wiki
 
 #
-### Licensing
-This software is licensed under the terms of the GPLv3. You can find a copy of the license in the LICENSE.txt file.
+### Créditos
+Ver https://github.com/LumaTeam/Luma3DS/wiki/Credits
 
-Files in the GDB stub are instead triple-licensed as MIT or "GPLv2 or any later version", in which case it's specified in the file header.
+#
+### Licencia
+Este software tiene licencia según los términos de la GPLv3. Puede encontrar una copia de la licencia en el archivo LICENSE.txt.
+
+En cambio, los archivos en el stub de GDB tienen una licencia triple como MIT o "GPLv2 o cualquier versión posterior", en cuyo caso se especifica en el encabezado del archivo.
