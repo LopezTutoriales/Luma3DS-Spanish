@@ -14,7 +14,7 @@ export VERSION_MAJOR	:=	$(shell git describe --tags --match v[0-9]* | cut -c2- |
 export VERSION_MINOR	:=	$(shell git describe --tags --match v[0-9]* | cut -c2- | cut -f1 -d- | cut -f2 -d.)
 export VERSION_BUILD	:=	$(shell git describe --tags --match v[0-9]* | cut -c2- | cut -f1 -d- | cut -f3 -d.)
 export COMMIT			:=	$(shell git rev-parse --short=8 HEAD)
-export IS_RELEASE		:=	0
+export IS_RELEASE		:=	1
 
 ifeq ($(strip $(REVISION)),)
 	export REVISION			:=	v0.0.0-0
