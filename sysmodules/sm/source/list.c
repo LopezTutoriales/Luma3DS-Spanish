@@ -91,7 +91,7 @@ void *allocateNode(void *inUseList, void *freeList, u32 elementSize, bool back)
     ListBase *freeListB = (ListBase *)freeList;
 
     if(freeListB->first == NULL)
-        panic(0);
+        panic();
 
     ListNodeBase *node = freeListB->first;
     ListNodeBase nodeBk = *node;
