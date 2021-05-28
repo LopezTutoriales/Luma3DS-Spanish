@@ -9,18 +9,18 @@ endif
 TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/base_rules
 
-export REVISION			:=	$(shell git describe --tags --match v[0-9]* --abbrev=0 | sed 's/-[0-9]*-g/-/')
+export REVISION			:=	$(shell git describe --tags --match v[0-9]* --abbrev=8 | sed 's/-[0-9]*-g/-/')
 export VERSION_MAJOR	:=	$(shell git describe --tags --match v[0-9]* | cut -c2- | cut -f1 -d- | cut -f1 -d.)
 export VERSION_MINOR	:=	$(shell git describe --tags --match v[0-9]* | cut -c2- | cut -f1 -d- | cut -f2 -d.)
 export VERSION_BUILD	:=	$(shell git describe --tags --match v[0-9]* | cut -c2- | cut -f1 -d- | cut -f3 -d.)
-export COMMIT			:=	$(shell git rev-parse --short=8 HEAD)
+export COMMIT			:=	0
 export IS_RELEASE		:=	1
 
 ifeq ($(strip $(REVISION)),)
-	export REVISION			:=	v0.0.0-0
-	export VERSION_MAJOR	:=	0
-	export VERSION_MINOR	:=	0
-	export VERSION_BUILD	:=	0
+	export REVISION			:=	v10.2.1 ESP
+	export VERSION_MAJOR	:=	10
+	export VERSION_MINOR	:=	2
+	export VERSION_BUILD	:=	1
 endif
 
 ifeq ($(strip $(COMMIT)),)
@@ -28,7 +28,7 @@ ifeq ($(strip $(COMMIT)),)
 endif
 
 ifeq ($(strip $(VERSION_BUILD)),)
-	export VERSION_BUILD	:=	0
+	export VERSION_BUILD	:=	1
 endif
 
 ifeq ($(strip $(shell git describe --tags --match v[0-9]* | grep -)),)
@@ -55,10 +55,9 @@ INCLUDES	:=	include
 ARCH	:=	-marm -march=armv5te -mtune=arm946e-s
 DEFINES :=	-DARM9 -D_3DS
 
-FALSEPOSITIVES := -Wno-array-bounds -Wno-stringop-overflow -Wno-stringop-overread
 CFLAGS	:=	-g -std=gnu11 -Wall -Wextra -Werror -O2 -mword-relocations \
 			-fomit-frame-pointer -ffunction-sections -fdata-sections \
-			-Wno-main $(FALSEPOSITIVES) $(ARCH) $(DEFINES)
+			-Wno-main $(ARCH) $(DEFINES)
 
 CFLAGS	+=	$(INCLUDE)
 

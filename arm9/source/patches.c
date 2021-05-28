@@ -48,7 +48,7 @@ u8 *getProcess9Info(u8 *pos, u32 size, u32 *process9Size, u32 *process9MemAddr)
 {
     u8 *temp = memsearch(pos, "NCCH", size, 4);
 
-    if(temp == NULL) error("Fallo al obtener los datos de Process9.");
+    if(temp == NULL) error("Failed to get Process9 data.");
 
     Cxi *off = (Cxi *)(temp - 0x100);
 
@@ -63,7 +63,7 @@ u32 *getKernel11Info(u8 *pos, u32 size, u32 *baseK11VA, u8 **freeK11Space, u32 *
     static const u8 pattern[] = {0x00, 0xB0, 0x9C, 0xE5};
     *arm11ExceptionsPage = (u32 *)memsearch(pos, pattern, size, sizeof(pattern));
 
-    if(*arm11ExceptionsPage == NULL) error("Fallo al obtener los datos de Kernel11.");
+    if(*arm11ExceptionsPage == NULL) error("Failed to get Kernel11 data.");
 
     u32 *arm11SvcTable;
 

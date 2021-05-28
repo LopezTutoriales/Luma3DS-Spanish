@@ -84,7 +84,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                "Splash: Apagada( ) Antes( ) Despues( ) payloads",
                                                "Duracion de Splash: 1( ) 3( ) 5( ) 7( ) segundos",
                                                "PIN: Apagado( ) 4( ) 6( ) 8( ) digitos",
-                                               "CPU New 3DS: Apagar( ) Clock( ) L2( ) Clock+L2( )",
+                                               "CPU New 3DS: Apag.( ) Clock( ) L2( ) Clock+L2( )",
                                              };
 
     static const char *singleOptionsText[] = { "( ) Autoiniciar EmuNAND",

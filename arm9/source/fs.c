@@ -154,11 +154,10 @@ bool findPayload(char *path, u32 pressed)
     return true;
 }
 
-bool payloadMenu(char *path, bool *hasDisplayedMenu)
+bool payloadMenu(char *path)
 {
     DIR dir;
 
-    *hasDisplayedMenu = false;
     if(f_opendir(&dir, "payloads") != FR_OK) return false;
 
     FILINFO info;
@@ -190,7 +189,6 @@ bool payloadMenu(char *path, bool *hasDisplayedMenu)
     if(payloadNum != 1)
     {
         initScreens();
-        *hasDisplayedMenu = true;
 
         drawString(true, 10, 10, COLOR_TITLE, "Luma3DS - cargador de payloads");
         drawString(true, 10, 10 + SPACING_Y, COLOR_TITLE, "Pulsa A para seleccionar, START para quitar");
