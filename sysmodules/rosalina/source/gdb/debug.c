@@ -460,8 +460,8 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
             switch(exc.type)
             {
                 case EXCEVENT_UNDEFINED_INSTRUCTION:
-                case EXCEVENT_PREFETCH_ABORT:
-                case EXCEVENT_DATA_ABORT:
+                case EXCEVENT_PREFETCH_ABORT: // doesn't include hardware breakpoints
+                case EXCEVENT_DATA_ABORT:     // doesn't include hardware watchpoints
                 case EXCEVENT_UNALIGNED_DATA_ACCESS:
                 case EXCEVENT_UNDEFINED_SYSCALL:
                 {
@@ -491,11 +491,9 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
 
                         case STOPPOINT_BREAKPOINT:
                         {
-                            // Note: this includes both "bkpt" and hw breakpoints, but we never use the latter...
-                            // However, since our GDB executable only knows about svc 0xFF as sw breakpoint for the 3DS ABI,
-                            // we can use swbreak as reason (it'll dismiss the bkpt instruction and try to auto-step over it).
+                            // /!\ Not actually implemented (and will never be)
                             GDB_ParseCommonThreadInfo(buffer, ctx, SIGTRAP);
-                            return GDB_SendFormattedPacket(ctx, "%s", buffer);
+                            return GDB_SendFormattedPacket(ctx, "%shwbreak:;", buffer);
                             break;
                         }
 
@@ -504,7 +502,7 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
                             const char *kinds[] = { "", "r", "", "a" };
                             WatchpointKind kind = GDB_GetWatchpointKind(ctx, exc.stop_point.fault_information);
                             if(kind == WATCHPOINT_DISABLED)
-                                GDB_SendDebugString(ctx, "Precaucion: Watchpoint desconocido encontrado!\n");
+                                GDB_SendDebugString(ctx, "Precaucion: ¡Watchpoint desconocido encontrado!\n");
 
                             GDB_ParseCommonThreadInfo(buffer, ctx, SIGTRAP);
                             return GDB_SendFormattedPacket(ctx, "%s%swatch:%08lx;", buffer, kinds[(u32)kind], exc.stop_point.fault_information);

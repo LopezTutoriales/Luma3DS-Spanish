@@ -3,17 +3,17 @@
 <osdata type="types">
   <item>
     <column name="Type">cfwversion</column>
-    <column name="Description">Listado de la version de Luma3DS, commit hash, etc.</column>
+    <column name="Description">Listing of the Luma3DS version, commit hash, etc.</column>
     <column name="Title">CFW</column>
   </item>
   <item>
     <column name="Type">memory</column>
-    <column name="Description">Listado de uso de memoria por region</column>
-    <column name="Title">Memoria</column>
+    <column name="Description">Listing of memory usage per region</column>
+    <column name="Title">Memory</column>
   </item>
   <item>
     <column name="Type">processes</column>
-    <column name="Description">Listado de todos los procesos</column>
-    <column name="Title">Procesos</column>
+    <column name="Description">Listing of all processes</column>
+    <column name="Title">Processes</column>
   </item>
 </osdata>
