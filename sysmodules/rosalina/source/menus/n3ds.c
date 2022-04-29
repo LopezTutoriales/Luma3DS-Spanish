@@ -50,7 +50,7 @@ void N3DSMenu_UpdateStatus(void)
     svcGetSystemInfo(&L2CacheEnabled, 0x10001, 2);
 
     N3DSMenu.items[0].title = L2CacheEnabled ? "Deshabilitar cache L2" : "Habilitar cache L2";
-    sprintf(clkRateBuf, "Frecuencia del reloj a %luMHz", clkRate != 268 ? 268 : (u32)higherClkRate);
+    sprintf(clkRateBuf, "Establecer frecuenc. del reloj a %luMHz", clkRate != 268 ? 268 : (u32)higherClkRate);
 }
 
 void N3DSMenu_ChangeClockRate(void)

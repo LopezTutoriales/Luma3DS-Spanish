@@ -16,12 +16,12 @@ static const struct
     GDBCommandHandler handler;
 } gdbVerboseCommandHandlers[] =
 {
-    { "Attach", GDB_VERBOSE_HANDLER(Attach) },
-    { "Cont?", GDB_VERBOSE_HANDLER(ContinueSupported) },
-    { "Cont",  GDB_VERBOSE_HANDLER(Continue) },
-    { "File", GDB_VERBOSE_HANDLER(File) },
-    { "MustReplyEmpty", GDB_HANDLER(Unsupported) },
-    { "Run", GDB_VERBOSE_HANDLER(Run) },
+    { "Adjuntar", GDB_VERBOSE_HANDLER(Attach) },
+    { "Continuar?", GDB_VERBOSE_HANDLER(ContinueSupported) },
+    { "Continuar",  GDB_VERBOSE_HANDLER(Continue) },
+    { "Archivo", GDB_VERBOSE_HANDLER(File) },
+    { "DebeEnviarVacio", GDB_HANDLER(Unsupported) },
+    { "Ejecutar", GDB_VERBOSE_HANDLER(Run) },
 };
 
 GDB_DECLARE_HANDLER(VerboseCommand)

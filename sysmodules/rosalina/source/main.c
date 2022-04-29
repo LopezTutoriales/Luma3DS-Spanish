@@ -1,6 +1,6 @@
 /*
 *   This file is part of Luma3DS
-*   Copyright (C) 2016-2020 Aurora Wright, TuxSH
+*   Copyright (C) 2016-2021 Aurora Wright, TuxSH
 *
 *   This program is free software: you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -89,8 +89,8 @@ void initSystem(void)
     menuCombo = out == 0 ? DEFAULT_MENU_COMBO : (u32)out;
 
     miscellaneousMenu.items[0].title = Luma_SharedConfig->hbldr_3dsx_tid == HBLDR_DEFAULT_3DSX_TID ?
-        "Cambiar esta aplicacion por Homebrew L." :
-        "Cambiar hblauncher_loader por Homebrew L.";
+        "Cambiar Homebrew Launcher por esta app" :
+        "Cambiar HBL. por hblauncher_loader";
 
     for(res = 0xD88007FA; res == (Result)0xD88007FA; svcSleepThread(500 * 1000LL))
     {
@@ -128,7 +128,6 @@ void initSystem(void)
 bool menuShouldExit = false;
 bool preTerminationRequested = false;
 Handle preTerminationEvent;
-extern bool isHidInitialized;
 
 static void handleTermNotification(u32 notificationId)
 {

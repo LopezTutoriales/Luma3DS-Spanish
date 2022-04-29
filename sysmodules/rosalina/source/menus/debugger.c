@@ -37,11 +37,11 @@
 #include "pmdbgext.h"
 
 Menu debuggerMenu = {
-    "Menu de opciones de depuracion",
+    "Menu de opciones de Depuracion",
     {
-        { "Habilitar depuracion",                   METHOD, .method = &DebuggerMenu_EnableDebugger  },
-        { "Deshabilitar depuracion",                METHOD, .method = &DebuggerMenu_DisableDebugger },
-        { "Forzar-depuracion al lanzar sig. apli.", METHOD, .method = &DebuggerMenu_DebugNextApplicationByForce },
+        { "Habilitar depurador",                           METHOD, .method = &DebuggerMenu_EnableDebugger  },
+        { "Deshabilitar depurador",                        METHOD, .method = &DebuggerMenu_DisableDebugger },
+        { "Forzar depuracion en la siguiente app lanzada", METHOD, .method = &DebuggerMenu_DebugNextApplicationByForce },
         {},
     }
 };
@@ -125,15 +125,15 @@ void DebuggerMenu_EnableDebugger(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones de depuracion");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones de Depuracion");
 
         if(alreadyEnabled)
             Draw_DrawString(10, 30, COLOR_WHITE, "Ya habilitado!");
         else if(!isSocURegistered)
-            Draw_DrawString(10, 30, COLOR_WHITE, "No se puede iniciar el depurador antes de que haya\nterminado de cargar el sistema.");
+            Draw_DrawString(10, 30, COLOR_WHITE, "Imposible iniciar el depurador antes de que el\nsistema termine de cargar.");
         else
         {
-            Draw_DrawString(10, 30, COLOR_WHITE, "Iniciando depurador...");
+            Draw_DrawString(10, 30, COLOR_WHITE, "Iniciando el depurador...");
 
             if(!done)
             {
@@ -149,11 +149,11 @@ void DebuggerMenu_EnableDebugger(void)
                 }
 
                 if(res != 0)
-                    sprintf(buf, "Iniciando depurador... Fallo (0x%08lx).", (u32)res);
+                    sprintf(buf, "Iniciando el depurador... fallo (0x%08lx).", (u32)res);
                 done = true;
             }
             if(res == 0)
-                Draw_DrawString(10, 30, COLOR_WHITE, "Iniciando depurador... OK.");
+                Draw_DrawString(10, 30, COLOR_WHITE, "Iniciando el depurador... OK.");
             else
                 Draw_DrawString(10, 30, COLOR_WHITE, buf);
         }
@@ -172,13 +172,13 @@ void DebuggerMenu_DisableDebugger(void)
     char buf[65];
 
     if(res != 0)
-        sprintf(buf, "Fallo al desactivar depurador (0x%08lx).", (u32)res);
+        sprintf(buf, "Fallo al quitar el depurador (0x%08lx).", (u32)res);
 
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones de depuracion");
-        Draw_DrawString(10, 30, COLOR_WHITE, initialized ? (res == 0 ? "Depurador desactivado con exito." : buf) : "Depurador no activado.");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones del Depuracion");
+        Draw_DrawString(10, 30, COLOR_WHITE, initialized ? (res == 0 ? "Depurador quitado con exito." : buf) : "Depurador no habilitado.");
         Draw_FlushFramebuffer();
         Draw_Unlock();
     }
@@ -206,7 +206,7 @@ void DebuggerMenu_DebugNextApplicationByForce(void)
                 nextApplicationGdbCtx->pid = 0xFFFFFFFF;
                 res = PMDBG_DebugNextApplicationByForce(true);
                 if(R_SUCCEEDED(res))
-                    sprintf(buf, "Operacion exitosa.\nUsa el puerto %d para conectar a la siguiente\naplicacion lanzada.", nextApplicationGdbCtx->localPort);
+                    sprintf(buf, "Operacion realizada.\nUsa el puerto %d para conectarte en la sig.\naplicacion lanzada.", nextApplicationGdbCtx->localPort);
                 else
                 {
                     nextApplicationGdbCtx->flags = 0;
@@ -216,7 +216,7 @@ void DebuggerMenu_DebugNextApplicationByForce(void)
                 }
             }
             else
-                strcpy(buf, "Error al asignar slot.\nAnule primero un proceso en la lista de procesos");
+                strcpy(buf, "Fallo al asignar un espacio.\nAnula la seleccion de un proceso de la lista primero");
         }
         GDB_UnlockAllContexts(&gdbServer);
     }
@@ -226,7 +226,7 @@ void DebuggerMenu_DebugNextApplicationByForce(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones de depuracion");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones de Depuracion");
         Draw_DrawString(10, 30, COLOR_WHITE, buf);
         Draw_FlushFramebuffer();
         Draw_Unlock();

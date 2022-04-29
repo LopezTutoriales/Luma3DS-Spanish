@@ -1,6 +1,6 @@
 /*
 *   This file is part of Luma3DS
-*   Copyright (C) 2016-2020 Aurora Wright, TuxSH
+*   Copyright (C) 2016-2021 Aurora Wright, TuxSH
 *
 *   This program is free software: you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -64,15 +64,15 @@ typedef struct DspFirm {
 } DspFirm;
 
 Menu miscellaneousMenu = {
-    "Menu de opciones miscelaneas",
+    "Miscellaneous options menu",
     {
-        { "Cambiar esta aplicacion por Homebrew L.", METHOD, .method = &MiscellaneousMenu_SwitchBoot3dsxTargetTitle },
+        { "Cambiar esta app por Homebrew Launcher", METHOD, .method = &MiscellaneousMenu_SwitchBoot3dsxTargetTitle },
         { "Cambiar botones para abrir Rosalina", METHOD, .method = &MiscellaneousMenu_ChangeMenuCombo },
         { "Iniciar InputRedirection", METHOD, .method = &MiscellaneousMenu_InputRedirection },
-        { "Actualizar fecha y hora por Internet", METHOD, .method = &MiscellaneousMenu_UpdateTimeDateNtp },
+        { "Actualizar hora y fecha por internet", METHOD, .method = &MiscellaneousMenu_UpdateTimeDateNtp },
         { "Anular compensacion horaria del usuario", METHOD, .method = &MiscellaneousMenu_NullifyUserTimeOffset },
         { "Dumpear firmware DSP", METHOD, .method = &MiscellaneousMenu_DumpDspFirm },
-        { "Guardar ajustes", METHOD, .method = &MiscellaneousMenu_SaveSettings },
+        { "Guardar configuracion", METHOD, .method = &MiscellaneousMenu_SaveSettings },
         {},
     }
 };
@@ -91,7 +91,7 @@ void MiscellaneousMenu_SwitchBoot3dsxTargetTitle(void)
         if(R_SUCCEEDED(res))
         {
             Luma_SharedConfig->hbldr_3dsx_tid = progInfo.programId;
-            miscellaneousMenu.items[0].title = "Cambiar hblauncher_loader por Homebrew L.";
+            miscellaneousMenu.items[0].title = "Cambiar HBL. por hblauncher_loader";
         }
         else
         {
@@ -103,7 +103,7 @@ void MiscellaneousMenu_SwitchBoot3dsxTargetTitle(void)
     {
         res = 0;
         Luma_SharedConfig->hbldr_3dsx_tid = HBLDR_DEFAULT_3DSX_TID;
-        miscellaneousMenu.items[0].title = "Cambiar esta aplicacion por Homebrew L.";
+        miscellaneousMenu.items[0].title = "Cambiar Homebrew Launcher por esta app";
     }
 
     Draw_Lock();
@@ -113,7 +113,7 @@ void MiscellaneousMenu_SwitchBoot3dsxTargetTitle(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones miscelaneas");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones Miscelaneas");
 
         if(R_SUCCEEDED(res))
             Draw_DrawString(10, 30, COLOR_WHITE, "Operacion existosa.");
@@ -133,7 +133,7 @@ static void MiscellaneousMenu_ConvertComboToString(char *out, u32 combo)
         "?", "?",
         "ZL", "ZR",
         "?", "?", "?", "?",
-        "Tocar",
+        "Touch",
         "?", "?", "?",
         "CStick Derecha", "CStick Izquierda", "CStick Arriba", "CStick Abajo",
         "CPad Derecha", "CPad Izquierda", "CPad Arriba", "CPad Abajo",
@@ -168,7 +168,7 @@ void MiscellaneousMenu_ChangeMenuCombo(void)
     MiscellaneousMenu_ConvertComboToString(comboStrOrig, menuCombo);
 
     Draw_Lock();
-    Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones miscelaneas");
+    Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones Miscelaneas");
 
     posY = Draw_DrawFormattedString(10, 30, COLOR_WHITE, "Combinacion actual:  %s", comboStrOrig);
     posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Ingrese nueva combinacion:");
@@ -179,12 +179,12 @@ void MiscellaneousMenu_ChangeMenuCombo(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones miscelaneas");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones Miscelaneas");
 
         posY = Draw_DrawFormattedString(10, 30, COLOR_WHITE, "Combinacion actual:  %s", comboStrOrig);
         posY = Draw_DrawFormattedString(10, posY + SPACING_Y, COLOR_WHITE, "Ingrese nueva combinacion: %s", comboStr) + SPACING_Y;
 
-        posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Combinacion cambiada exitosamente.");
+        posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Combinacion cambiada con exito.");
 
         Draw_FlushFramebuffer();
         Draw_Unlock();
@@ -250,7 +250,7 @@ void MiscellaneousMenu_SaveSettings(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones miscelaneas");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones Miscelaneas");
         if(R_SUCCEEDED(res))
             Draw_DrawString(10, 30, COLOR_WHITE, "Operacion exitosa.");
         else
@@ -274,7 +274,7 @@ void MiscellaneousMenu_InputRedirection(void)
     {
         res = InputRedirection_Disable(5 * 1000 * 1000 * 1000LL);
         if(res != 0)
-            sprintf(buf, "Fallo al parar InputRedirection (0x%08lx).", (u32)res);
+            sprintf(buf, "Error al parar InputRedirection (0x%08lx).", (u32)res);
         else
             miscellaneousMenu.items[2].title = "Iniciar InputRedirection";
     }
@@ -304,7 +304,7 @@ void MiscellaneousMenu_InputRedirection(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones miscelaneas");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones Miscelaneas");
 
         if(!wasEnabled && cantStart)
             Draw_DrawString(10, 30, COLOR_WHITE, "No se puede iniciar InputRedirection antes de que\nel sistema se haya cargado.");
@@ -385,7 +385,7 @@ void MiscellaneousMenu_UpdateTimeDateNtp(void)
 
     bool isSocURegistered;
 
-    time_t t;
+    u64 msSince1900, samplingTick;
 
     res = srvIsServiceRegistered(&isSocURegistered, "soc:U");
     cantStart = R_FAILED(res) || !isSocURegistered;
@@ -396,7 +396,7 @@ void MiscellaneousMenu_UpdateTimeDateNtp(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones miscelaneas");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones Miscelaneas");
 
         absOffset = utcOffset - 12;
         absOffset = absOffset < 0 ? -absOffset : absOffset;
@@ -424,19 +424,18 @@ void MiscellaneousMenu_UpdateTimeDateNtp(void)
     res = 0;
     if(!cantStart)
     {
-        res = ntpGetTimeStamp(&t);
+        res = ntpGetTimeStamp(&msSince1900, &samplingTick);
         if(R_SUCCEEDED(res))
         {
-            t += 3600 * utcOffset;
-            t += 60 * utcOffsetMinute;
-            res = ntpSetTimeDate(t);
+            msSince1900 += 1000 * (3600 * utcOffset + 60 * utcOffsetMinute);
+            res = ntpSetTimeDate(msSince1900, samplingTick);
         }
     }
 
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones miscelaneas");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones Miscelaneas");
 
         absOffset = utcOffset;
         absOffset = absOffset < 0 ? -absOffset : absOffset;
@@ -469,7 +468,7 @@ void MiscellaneousMenu_NullifyUserTimeOffset(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones miscelaneas");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones Miscelaneas");
         if(R_SUCCEEDED(res))
             Draw_DrawString(10, 30, COLOR_WHITE, "Operacion exitosa.\n\nReinicia para aplicar los cambios.");
         else
@@ -535,9 +534,9 @@ void MiscellaneousMenu_DumpDspFirm(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones miscelaneas");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones Miscelaneas");
         if(R_SUCCEEDED(res))
-            Draw_DrawString(10, 30, COLOR_WHITE, "Firm. DSP guardado en /3ds/dspfirm.cdc\nen la tarjeta SD.");
+            Draw_DrawString(10, 30, COLOR_WHITE, "Firm. DSP guardado con exito en /3ds/dspfirm.cdc\nen la tarjeta SD.");
         else
             Draw_DrawFormattedString(
                 10, 30, COLOR_WHITE,

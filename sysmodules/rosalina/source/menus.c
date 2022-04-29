@@ -48,7 +48,7 @@ Menu rosalinaMenu = {
         { "Cambiar brillo de pantalla", METHOD, .method = &RosalinaMenu_ChangeScreenBrightness },
         { "Trucos...", METHOD, .method = &RosalinaMenu_Cheats },
         { "Lista de procesos", METHOD, .method = &RosalinaMenu_ProcessList },
-        { "Opciones de depuracion...", MENU, .menu = &debuggerMenu },
+        { "Opciones del depurador...", MENU, .menu = &debuggerMenu },
         { "Configuracion de sistema...", MENU, .menu = &sysconfigMenu },
         { "Filtros de pantalla...", MENU, .menu = &screenFiltersMenu },
         { "Menu de New 3DS...", MENU, .menu = &N3DSMenu, .visibility = &menuCheckN3ds },
@@ -102,7 +102,7 @@ void RosalinaMenu_ShowDebugInfo(void)
         if (mcuFwVersion != 0)
         {
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "Version Firmware MCU: %lu.%lu\n",
+                10, posY, COLOR_WHITE, "Version de FW MCU: %lu.%lu\n",
                 GET_VERSION_MAJOR(mcuFwVersion), GET_VERSION_MINOR(mcuFwVersion)
             );
         }
@@ -139,14 +139,14 @@ void RosalinaMenu_ShowCredits(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Rosalina -- Creditos Luma3DS");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Rosalina -- Creditos de Luma3DS");
 
-        u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, "Luma3DS (c) 2016-2021 AuroraWright, TuxSH") + SPACING_Y;
+        u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, "Luma3DS (c) 2016-2022 AuroraWright, TuxSH") + SPACING_Y;
 
         posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Codigo de carga de 3DSX por fincs");
         posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Codigo de red y funcionalidad GDB basica por Stary");
         posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "InputRedirection por Stary (PoC por ShinyQuagsire)");
-		posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Traduccion por Lopez Tutoriales");
+		posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Traduccion por Lopez Tutoriales");																					   
 
         posY += 2 * SPACING_Y;
 
@@ -155,7 +155,7 @@ void RosalinaMenu_ShowCredits(void)
                 "Especial agradecimiento a:\n"
                 "  fincs, WinterMute, mtheall, piepie62,\n"
                 "  Contribuyentes de Luma3DS y de libctru,\n"
-                "  Otras personas"
+                "  otras personas"
             ));
 
         Draw_FlushFramebuffer();
@@ -175,7 +175,7 @@ void RosalinaMenu_Reboot(void)
     {
         Draw_Lock();
         Draw_DrawString(10, 10, COLOR_TITLE, "Reiniciar");
-        Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para reiniciar, Pulsa B para volver.");
+        Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para reiniciar, pulsa B para volver.");
         Draw_FlushFramebuffer();
         Draw_Unlock();
 
@@ -214,7 +214,7 @@ void RosalinaMenu_ChangeScreenBrightness(void)
             10,
             posY,
             COLOR_WHITE,
-            "Luminancia actual: %lu (min. %lu, max. %lu)\n\n",
+            "Brillo actual: %lu (min. %lu, max. %lu)\n\n",
             luminance,
             minLum,
             maxLum
@@ -302,7 +302,7 @@ void RosalinaMenu_PowerOff(void) // Soft shutdown.
     {
         Draw_Lock();
         Draw_DrawString(10, 10, COLOR_TITLE, "Apagar");
-        Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para apagar, Pulsa B para volver.");
+        Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para apagar, pulsa B para volver.");
         Draw_FlushFramebuffer();
         Draw_Unlock();
 
@@ -407,6 +407,8 @@ void RosalinaMenu_TakeScreenshot(void)
         FSUSER_CloseArchive(archive);
     }
 
+    // Conversion code adapted from https://stackoverflow.com/questions/21593692/convert-unix-timestamp-to-date-without-system-libs
+    // (original author @gnif under CC-BY-SA 4.0)
     u32 seconds, minutes, hours, days, year, month;
     u64 milliseconds = osGetTime();
     seconds = milliseconds/1000;
@@ -450,19 +452,19 @@ void RosalinaMenu_TakeScreenshot(void)
     days++;
     month++;
 
-    sprintf(filename, "/luma/screenshots/%04lu-%02lu-%02lu_%02lu-%02lu-%02lu.%03llu_top.bmp", year, month, days, hours, minutes, seconds, milliseconds);
+    sprintf(filename, "/luma/screenshots/%04lu-%02lu-%02lu_%02lu-%02lu-%02lu.%03llu_superior.bmp", year, month, days, hours, minutes, seconds, milliseconds);
     TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
     TRY(RosalinaMenu_WriteScreenshot(&file, topWidth, true, true));
     TRY(IFile_Close(&file));
 
-    sprintf(filename, "/luma/screenshots/%04lu-%02lu-%02lu_%02lu-%02lu-%02lu.%03llu_bot.bmp", year, month, days, hours, minutes, seconds, milliseconds);
+    sprintf(filename, "/luma/screenshots/%04lu-%02lu-%02lu_%02lu-%02lu-%02lu.%03llu_inferior.bmp", year, month, days, hours, minutes, seconds, milliseconds);
     TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
     TRY(RosalinaMenu_WriteScreenshot(&file, bottomWidth, false, true));
     TRY(IFile_Close(&file));
 
     if(is3d && (Draw_GetCurrentFramebufferAddress(true, true) != Draw_GetCurrentFramebufferAddress(true, false)))
     {
-        sprintf(filename, "/luma/screenshots/%04lu-%02lu-%02lu_%02lu-%02lu-%02lu.%03llu_top_right.bmp", year, month, days, hours, minutes, seconds, milliseconds);
+        sprintf(filename, "/luma/screenshots/%04lu-%02lu-%02lu_%02lu-%02lu-%02lu.%03llu_superior_derecha.bmp", year, month, days, hours, minutes, seconds, milliseconds);
         TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
         TRY(RosalinaMenu_WriteScreenshot(&file, topWidth, true, false));
         TRY(IFile_Close(&file));

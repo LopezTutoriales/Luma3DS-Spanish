@@ -105,10 +105,10 @@ static void ScreenFiltersMenu_SetCct(int cct)
 }
 
 Menu screenFiltersMenu = {
-    "Menu filtros de pantalla",
+    "Menu de filtros de pantalla",
     {
         { "[6500K]  Por defecto", METHOD, .method = &ScreenFiltersMenu_SetDefault },
-        { "[10000K] Acuario", METHOD, .method = &ScreenFiltersMenu_SetAquarium },
+        { "[10000K] Aquario", METHOD, .method = &ScreenFiltersMenu_SetAquarium },
         { "[7500K]  Cielo nublado", METHOD, .method = &ScreenFiltersMenu_SetOvercastSky },
         { "[5500K]  Luz", METHOD, .method = &ScreenFiltersMenu_SetDaylight },
         { "[4200K]  Fluorescente", METHOD, .method = &ScreenFiltersMenu_SetFluorescent },

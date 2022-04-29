@@ -287,7 +287,7 @@ static int GDB_ParseCommonThreadInfo(char *out, GDBContext *ctx, int sig)
     s64 dummy;
     u32 core;
     Result r = svcGetDebugThreadContext(&regs, ctx->debug, threadId, THREADCONTEXT_CONTROL_ALL);
-    int n = sprintf(out, "T%02xthread:%lx;", sig, threadId);
+    int n = sprintf(out, "T%02xhilo:%lx;", sig, threadId);
 
     if(R_FAILED(r))
         return n;
@@ -295,7 +295,7 @@ static int GDB_ParseCommonThreadInfo(char *out, GDBContext *ctx, int sig)
     r = svcGetDebugThreadParam(&dummy, &core, ctx->debug, ctx->currentThreadId, DBGTHREAD_PARAMETER_CPU_CREATOR); // Creator = "first ran, and running the thread"
 
     if(R_SUCCEEDED(r))
-        n += sprintf(out + n, "core:%lx;", core);
+        n += sprintf(out + n, "nucleo:%lx;", core);
 
     for(u32 i = 0; i <= 12; i++)
         n += sprintf(out + n, "%lx:%08lx;", i, __builtin_bswap32(regs.cpu_registers.r[i]));
@@ -431,7 +431,7 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
             else
             {
                 ctx->currentThreadId = info->thread_id;
-                return GDB_SendPacket(ctx, "T05create:;", 10);
+                return GDB_SendPacket(ctx, "T05crear:;", 10);
             }
         }
 
@@ -460,8 +460,8 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
             switch(exc.type)
             {
                 case EXCEVENT_UNDEFINED_INSTRUCTION:
-                case EXCEVENT_PREFETCH_ABORT: // doesn't include hardware breakpoints
-                case EXCEVENT_DATA_ABORT:     // doesn't include hardware watchpoints
+                case EXCEVENT_PREFETCH_ABORT:
+                case EXCEVENT_DATA_ABORT:
                 case EXCEVENT_UNALIGNED_DATA_ACCESS:
                 case EXCEVENT_UNDEFINED_SYSCALL:
                 {
@@ -485,15 +485,17 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
                         case STOPPOINT_SVC_FF:
                         {
                             GDB_ParseCommonThreadInfo(buffer, ctx, SIGTRAP);
-                            return GDB_SendFormattedPacket(ctx, "%sswbreak:;", buffer);
+                            return GDB_SendFormattedPacket(ctx, "%sswparar:;", buffer);
                             break;
                         }
 
                         case STOPPOINT_BREAKPOINT:
                         {
-                            // /!\ Not actually implemented (and will never be)
+                            // Note: this includes both "bkpt" and hw breakpoints, but we never use the latter...
+                            // However, since our GDB executable only knows about svc 0xFF as sw breakpoint for the 3DS ABI,
+                            // we can use swbreak as reason (it'll dismiss the bkpt instruction and try to auto-step over it).
                             GDB_ParseCommonThreadInfo(buffer, ctx, SIGTRAP);
-                            return GDB_SendFormattedPacket(ctx, "%shwbreak:;", buffer);
+                            return GDB_SendFormattedPacket(ctx, "%s", buffer);
                             break;
                         }
 
@@ -502,10 +504,10 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
                             const char *kinds[] = { "", "r", "", "a" };
                             WatchpointKind kind = GDB_GetWatchpointKind(ctx, exc.stop_point.fault_information);
                             if(kind == WATCHPOINT_DISABLED)
-                                GDB_SendDebugString(ctx, "Precaucion: ¡Watchpoint desconocido encontrado!\n");
+                                GDB_SendDebugString(ctx, "Advertencia: watchpoint desconocido encontrado!\n");
 
                             GDB_ParseCommonThreadInfo(buffer, ctx, SIGTRAP);
-                            return GDB_SendFormattedPacket(ctx, "%s%swatch:%08lx;", buffer, kinds[(u32)kind], exc.stop_point.fault_information);
+                            return GDB_SendFormattedPacket(ctx, "%s%smuestra:%08lx;", buffer, kinds[(u32)kind], exc.stop_point.fault_information);
                             break;
                         }
 

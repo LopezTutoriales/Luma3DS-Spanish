@@ -36,7 +36,7 @@
 static _3DSX_Reloc s_relocBuf[MAXRELOCS];
 u32 ldrArgvBuf[ARGVBUF_SIZE/4];
 
-#define SEC_ASSERT(x) do { if (!(x)) { Log_PrintP("Assertion failed: %s", #x); return false; } } while (0)
+#define SEC_ASSERT(x) do { if (!(x)) { Log_PrintP("Asercion fallo: %s", #x); return false; } } while (0)
 
 typedef struct
 {
@@ -69,7 +69,7 @@ bool Ldr_Get3dsxSize(u32* pSize, IFile *file)
 
     if (IFile_Read2(file, &hdr, sizeof(hdr), 0) != sizeof(hdr))
     {
-        Log_PrintP("Fallo al leer la cabeza del 3DSX");
+        Log_PrintP("No se puede leer header de 3DSX");
         return false;
     }
 
@@ -131,7 +131,7 @@ Handle Ldr_CodesetFrom3dsx(const char* name, u32* codePages, u32 baseAddr, IFile
     {
         if (IFile_Read2(file, &extraPage[i*nRelocTables], hdr.relocHdrSize, readOffset) != hdr.relocHdrSize)
         {
-            Log_PrintP("No se puede leer el reencabezado %d", i);
+            Log_PrintP("No se puede leer relheader %d", i);
             return 0;
         }
         readOffset += hdr.relocHdrSize;
@@ -140,7 +140,7 @@ Handle Ldr_CodesetFrom3dsx(const char* name, u32* codePages, u32 baseAddr, IFile
     // Read the code segment
     if (IFile_Read2(file, d.segPtrs[0], hdr.codeSegSize, readOffset) != hdr.codeSegSize)
     {
-        Log_PrintP("No se puede leer el segmento de codigo");
+        Log_PrintP("No se puede leer code segment");
         return 0;
     }
     readOffset += hdr.codeSegSize;
@@ -148,7 +148,7 @@ Handle Ldr_CodesetFrom3dsx(const char* name, u32* codePages, u32 baseAddr, IFile
     // Read the rodata segment
     if (IFile_Read2(file, d.segPtrs[1], hdr.rodataSegSize, readOffset) != hdr.rodataSegSize)
     {
-        Log_PrintP("No se puede leer el segmento de rodata");
+        Log_PrintP("No se puede leer rodata segment");
         return 0;
     }
     readOffset += hdr.rodataSegSize;
@@ -157,7 +157,7 @@ Handle Ldr_CodesetFrom3dsx(const char* name, u32* codePages, u32 baseAddr, IFile
     u32 dataLoadSegSize = hdr.dataSegSize - hdr.bssSize;
     if (IFile_Read2(file, d.segPtrs[2], dataLoadSegSize, readOffset) != dataLoadSegSize)
     {
-        Log_PrintP("No se puede leer el segmento de datos");
+        Log_PrintP("No se puede leer data segment");
         return 0;
     }
     readOffset += dataLoadSegSize;
@@ -187,7 +187,7 @@ Handle Ldr_CodesetFrom3dsx(const char* name, u32* codePages, u32 baseAddr, IFile
                 u32 readSize = toDo*sizeof(_3DSX_Reloc);
                 if (IFile_Read2(file, s_relocBuf, readSize, readOffset) != readSize)
                 {
-                    Log_PrintP("No se puede leer la tabla de reloc (%d,%d)", i, j);
+                    Log_PrintP("No se puede leer reloc table (%d,%d)", i, j);
                     return 0;
                 }
                 readOffset += readSize;
@@ -209,7 +209,7 @@ Handle Ldr_CodesetFrom3dsx(const char* name, u32* codePages, u32 baseAddr, IFile
                             {
                                 if (subType != 0)
                                 {
-                                    Log_PrintP("Subtipo de reloc absoluto no admitido (%lu)", subType);
+                                    Log_PrintP("Absolute reloc subtype no soportado (%lu)", subType);
                                     return 0;
                                 }
                                 *pos = addr;
@@ -223,7 +223,7 @@ Handle Ldr_CodesetFrom3dsx(const char* name, u32* codePages, u32 baseAddr, IFile
                                     case 0: *pos = data;            break; // 32-bit signed offset
                                     case 1: *pos = data &~ BIT(31); break; // 31-bit signed offset
                                     default:
-                                        Log_PrintP("Subtipo de reloc relativo no admitido (%lu)", subType);
+                                        Log_PrintP("Relative reloc subtype no soportado (%lu)", subType);
                                         return 0;
                                 }
                                 break;
@@ -276,7 +276,7 @@ Handle Ldr_CodesetFrom3dsx(const char* name, u32* codePages, u32 baseAddr, IFile
     res = svcCreateCodeSet(&hCodeset, &csinfo, d.segPtrs[0], d.segPtrs[1], d.segPtrs[2]);
     if (res)
     {
-        Log_PrintP("svcCreateCodeSet: %08lX", res);
+        Log_PrintP("svcCrearConjuntoCodigo: %08lX", res);
         return 0;
     }
 

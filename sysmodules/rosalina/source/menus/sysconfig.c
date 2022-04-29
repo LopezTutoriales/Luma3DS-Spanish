@@ -1,6 +1,6 @@
 /*
 *   This file is part of Luma3DS
-*   Copyright (C) 2016-2020 Aurora Wright, TuxSH
+*   Copyright (C) 2016-2021 Aurora Wright, TuxSH
 *
 *   This program is free software: you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@
 #include "ifile.h"
 
 Menu sysconfigMenu = {
-    "Menu configuracion de sistema",
+    "Menu de configuracion del sistema",
     {
         { "Controlar conexion Wifi", METHOD, .method = &SysConfigMenu_ControlWifi },
-        { "Apagar LEDs", METHOD, .method = &SysConfigMenu_ToggleLEDs },
-        { "Desactivar adaptador Wifi", METHOD, .method = &SysConfigMenu_ToggleWireless },
-        { "Desactivar boton Power", METHOD, .method=&SysConfigMenu_TogglePowerButton },
+        { "Alternar LEDs", METHOD, .method = &SysConfigMenu_ToggleLEDs },
+        { "Alternar adaptador Wifi", METHOD, .method = &SysConfigMenu_ToggleWireless },
+        { "Alternar boton Power", METHOD, .method=&SysConfigMenu_TogglePowerButton },
         {},
     }
 };
@@ -55,11 +55,12 @@ void SysConfigMenu_ToggleLEDs(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu configuracion de sistema");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de configuracion del sistema");
         Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para cambiar, Pulsa B para volver.");
         Draw_DrawString(10, 50, COLOR_RED, "ADVERTENCIA:");
-        Draw_DrawString(10, 60, COLOR_WHITE, "  * El modo reposo cambia el estado de los LEDs!");
-        Draw_DrawString(10, 70, COLOR_WHITE, "  * No se puede apagar los LEDs con la bateria baja");
+        Draw_DrawString(10, 60, COLOR_WHITE, "  * El modo reposo reseteara el estado de los LEDs!");
+        Draw_DrawString(10, 70, COLOR_WHITE, "  * No se puede alternar los LEDs con la bateria");
+		Draw_DrawString(10, 80, COLOR_WHITE, "    baja!");
 
         Draw_FlushFramebuffer();
         Draw_Unlock();
@@ -93,7 +94,7 @@ void SysConfigMenu_ToggleWireless(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu configuracion de sistema");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de configuracion del sistema");
         Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para cambiar, Pulsa B para volver.");
 
         u8 wireless = (*(vu8 *)((0x10140000 | (1u << 31)) + 0x180));
@@ -105,9 +106,9 @@ void SysConfigMenu_ToggleWireless(void)
         }
         else
         {
-            Draw_DrawString(10, 50, COLOR_RED, "Servicio de red no funciona.");
+            Draw_DrawString(10, 50, COLOR_RED, "Administrador de redes no esta ejecutandose.");
             Draw_DrawString(10, 60, COLOR_RED, "Si estas en modo TEST, sal y luego");
-            Draw_DrawString(10, 70, COLOR_RED, "pulsa R+DERECHA para habilitar el wifi.");
+            Draw_DrawString(10, 70, COLOR_RED, "pulsa R+DERECHA para alternar el wifi.");
             Draw_DrawString(10, 80, COLOR_RED, "Si no, solo sal y espera unos segundos.");
         }
 
@@ -139,7 +140,7 @@ void SysConfigMenu_UpdateStatus(bool control)
     }
     else
     {
-        item->title = "Desactivar conexion Wifi forzada";
+        item->title = "Disable forced wireless connection";
         item->method = &SysConfigMenu_DisableForcedWifiConnection;
     }
 }
@@ -180,7 +181,7 @@ static bool SysConfigMenu_ForceWifiConnection(int slot)
     char infoString[80] = {0};
     u32 infoStringColor = forcedConnection ? COLOR_GREEN : COLOR_RED;
     if(forcedConnection)
-        sprintf(infoString, "Exito. Conexion wifi forzada a: %s", ssid);
+        sprintf(infoString, "Conexion forzada a: %s con exito", ssid);
     else
        sprintf(infoString, "Fallo al conectar al slot %d", slot + 1);
 
@@ -192,7 +193,7 @@ static bool SysConfigMenu_ForceWifiConnection(int slot)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu configuracion de sistema");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de configuracion del sistema");
         Draw_DrawString(10, 30, infoStringColor, infoString);
         Draw_DrawString(10, 40, COLOR_WHITE, "Pulsa B para volver.");
 
@@ -225,7 +226,7 @@ void SysConfigMenu_TogglePowerButton(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu configuracion de sistema");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de configuracion del sistema");
         Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para cambiar, Pulsa B para volver.");
 
         Draw_DrawString(10, 50, COLOR_WHITE, "Estado actual:");
@@ -263,7 +264,7 @@ void SysConfigMenu_ControlWifi(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu configuracion de sistema");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de configuracion del sistema");
         Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para fozar una conexion al slot:");
         Draw_DrawString(10, 40, COLOR_WHITE, slotString);
         Draw_DrawString(10, 60, COLOR_WHITE, "Pulsa B para volver.");
@@ -325,7 +326,7 @@ void SysConfigMenu_DisableForcedWifiConnection(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu configuracion de sistema");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de configuracion del sistema");
         Draw_DrawString(10, 30, COLOR_WHITE, "Conexion forzada desactivada correctamente.\nNota: La conexion automatica puede estropearse.");
 
         u32 pressed = waitInputWithTimeout(1000);

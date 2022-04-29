@@ -72,11 +72,11 @@ static int ERRF_FormatError(char *out, ERRF_FatalErrInfo *info)
 {
     char *outStart = out;
     static const char *types[] = {
-        "generico", "corrupto", "SD quitada", "excepcion", "resultado fallido", "registrado", "invalido"
+        "generico", "corrupto", "SD quitada", "excepcion", "resultado fallido", "registrado", "no valido"
     };
 
     static const char *exceptionTypes[] = {
-        "aborto de precarga", "aborto de datos", "instruccion indefinida", "VFP", "invalido"
+        "aborto de precarga", "aborto de datos", "instruccion no definida", "VFP", "no valido"
     };
 
     const char *type = (u32)info->type > (u32)ERRF_ERRTYPE_LOGGED ? types[6] : types[(u32)info->type];
@@ -86,17 +86,17 @@ static int ERRF_FormatError(char *out, ERRF_FatalErrInfo *info)
         const char *exceptionType = (u32)info->data.exception_data.excep.type > (u32)ERRF_EXCEPTION_VFP ?
                                     exceptionTypes[4] : exceptionTypes[(u32)info->data.exception_data.excep.type];
 
-        out += sprintf(out, "Tipo error:       excepcion (%s)\n", exceptionType);
+        out += sprintf(out, "Tipo de error:    excepcion (%s)\n", exceptionType);
     }
     else
-        out += sprintf(out, "Tipo error:       %s\n", type);
+        out += sprintf(out, "Tipo de error:    %s\n", type);
 
     if(info->type != ERRF_ERRTYPE_CARD_REMOVED)
     {
         Handle processHandle;
         Result res;
 
-        out += sprintf(out, "\nID proceso:       %lu\n", info->procId);
+        out += sprintf(out, "\nID del proceso:   %lu\n", info->procId);
 
         res = svcOpenProcess(&processHandle, info->procId);
         if(R_SUCCEEDED(res))
@@ -106,8 +106,8 @@ static int ERRF_FormatError(char *out, ERRF_FatalErrInfo *info)
             svcGetProcessInfo((s64 *)name, processHandle, 0x10000);
             svcGetProcessInfo((s64 *)&titleId, processHandle, 0x10001);
             svcCloseHandle(processHandle);
-            out += sprintf(out, "Nombre proceso:     %s\n", name);
-            out += sprintf(out, "ID titulo proceso: 0x%016llx\n", titleId);
+            out += sprintf(out, "Nombre proceso:   %s\n", name);
+            out += sprintf(out, "ID titulo proceso:0x%016llx\n", titleId);
         }
 
         out += sprintf(out, "\n");
@@ -157,19 +157,19 @@ static int ERRF_FormatError(char *out, ERRF_FatalErrInfo *info)
     else if(info->type != ERRF_ERRTYPE_CARD_REMOVED)
     {
         if(info->type != ERRF_ERRTYPE_FAILURE)
-            out += sprintf(out, "Direccion:          0x%08lx\n", info->pcAddr);
+            out += sprintf(out, "Direccion:        0x%08lx\n", info->pcAddr);
 
-        out += sprintf(out, "Codigo error:       0x%08lx\n", info->resCode);
+        out += sprintf(out, "Codigo de error:  0x%08lx\n", info->resCode);
     }
 
     const char *desc;
     switch(info->type)
     {
         case ERRF_ERRTYPE_CARD_REMOVED:
-            desc = "La SD fue quitada.";
+            desc = "La SD ha sido quitada.";
             break;
         case ERRF_ERRTYPE_MEM_CORRUPT:
-            desc = "La memoria del sistema se ha estropeado.";
+            desc = "Memoria del sistema estropeada.";
             break;
         case ERRF_ERRTYPE_FAILURE:
             info->data.failure_mesg[0x5F] = 0; // make sure the last byte in the IPC buffer is NULL

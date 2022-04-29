@@ -1,6 +1,6 @@
 /*
 *   This file is part of Luma3DS
-*   Copyright (C) 2016-2020 Aurora Wright, TuxSH
+*   Copyright (C) 2016-2022 Aurora Wright, TuxSH
 *
 *   This program is free software: you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -50,6 +50,8 @@ typedef struct ProcessInfo
 static ProcessInfo infos[0x40] = {0}, infosPrev[0x40] = {0};
 extern GDBServer gdbServer;
 
+bool ascii = false;
+
 static inline int ProcessListMenu_FormatInfoLine(char *out, const ProcessInfo *info)
 {
     const char *checkbox;
@@ -95,8 +97,8 @@ static void ProcessListMenu_DumpMemory(const char *name, void *start, u32 size)
 #define TRY(expr) if(R_FAILED(res = (expr))) goto end;
 
     Draw_Lock();
-    Draw_DrawString(10, 10, COLOR_TITLE, "Volcado de memoria");
-    const char * wait_message = "Espere, puede tardar un rato...";
+    Draw_DrawString(10, 10, COLOR_TITLE, "Dumpeo de memoria");
+    const char * wait_message = "Espere, esto puede tomar un tiempo...";
     Draw_DrawString(10, 30, COLOR_WHITE, wait_message);
     Draw_FlushFramebuffer();
     Draw_Unlock();
@@ -183,7 +185,7 @@ end:
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Volcado de memoria");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Dumpeo de memoria");
         Draw_DrawFormattedString(10, 30, COLOR_WHITE, "%*s", strlen(wait_message), " ");
         if(R_FAILED(res))
         {
@@ -382,6 +384,11 @@ static void ProcessListMenu_MemoryViewer(const ProcessInfo *info)
             menus[MENU_MODE_SEARCH].buf = searchPattern;
             menus[MENU_MODE_SEARCH].max = 1;
             // ------------------------------------------
+            char u8ToChar(u8 val) {
+                if(val < 32 || val > 126)
+                    return '-';
+                return val;
+            }
 
             void drawMenu(void)
             {
@@ -396,31 +403,37 @@ static void ProcessListMenu_MemoryViewer(const ProcessInfo *info)
                 switch(menuMode)
                 {
                     case MENU_MODE_NORMAL:
-                        Draw_DrawString(10 + SPACING_X * 7, instructionsY, COLOR_GREEN, "Mover");
+                        Draw_DrawString(10 + SPACING_X * 9, instructionsY, COLOR_GREEN, "mover");
                         break;
                     case MENU_MODE_GOTO:
-                        Draw_DrawString(10 + SPACING_X * 17, instructionsY, COLOR_GREEN, "Saltar");
+                        Draw_DrawString(10 + SPACING_X * 20, instructionsY, COLOR_GREEN, "saltar");
                         break;
                     case MENU_MODE_SEARCH:
-                        Draw_DrawString(10 + SPACING_X * 30, instructionsY, COLOR_GREEN, "buscar");
+                        Draw_DrawString(10 + SPACING_X * 31, instructionsY, COLOR_GREEN, "buscar");
                         break;
                     default: break;
                 }
 
                 if(editing)
-                    Draw_DrawString(10 + SPACING_X * 41, instructionsY, COLOR_RED, "editar");
+                    Draw_DrawString(10 + SPACING_X * 44, instructionsY, COLOR_RED, "editar");
                 // ------------------------------------------
 
                 // Location
+                const u32 infoY = instructionsY + SPACING_Y;
+                viewerY += SPACING_Y;
                 if(codeAvailable && heapAvailable)
-                {
-                    const u32 infoY = instructionsY + SPACING_Y;
-                    viewerY += SPACING_Y;
-                    Draw_DrawString(10, infoY, COLOR_WHITE, "Pulsar L o R alternara entre monton y codigo.");
+                {    
+                    Draw_DrawString(10, infoY, COLOR_WHITE, "Pulsar L o R alternara entre pila y codigo.");
                     if((u32)menus[MENU_MODE_NORMAL].buf == heapDestAddress)
-                        Draw_DrawString(10 + SPACING_X * 29, infoY, COLOR_GREEN, "monton");
+                        Draw_DrawString(10 + SPACING_X * 31, infoY, COLOR_GREEN, "pila");
                     if((u32)menus[MENU_MODE_NORMAL].buf == codeDestAddress)
-                        Draw_DrawString(10 + SPACING_X * 38, infoY, COLOR_GREEN, "codigo");
+                        Draw_DrawString(10 + SPACING_X * 40, infoY, COLOR_GREEN, "codigo");
+                }
+                else
+                {
+                    Draw_DrawString(10, infoY, COLOR_WHITE, "SELECT: Dumpear memoria, START: Vista ASCII.");
+                    if(ascii)
+                        Draw_DrawString(10 + SPACING_X * 39, infoY, COLOR_GREEN, "ASCII");
                 }
                 // ------------------------------------------
 
@@ -438,10 +451,23 @@ static void ProcessListMenu_MemoryViewer(const ProcessInfo *info)
 
                         if(address < menus[menuMode].max)
                         {
-                            Draw_DrawFormattedString(x, y,
-                            address == menus[menuMode].selected ? (editing ? COLOR_RED : COLOR_GREEN) : COLOR_WHITE,
-                            "%.2x",
-                            menus[menuMode].buf[address]);
+                            u32 color;
+                            if(address == menus[menuMode].selected)
+                            {
+                                if(editing)
+                                    color = COLOR_RED;
+                                else
+                                    color = COLOR_GREEN;
+                            }
+                            else
+                                color = COLOR_WHITE;
+
+                            u8 val = menus[menuMode].buf[address];
+                            
+                            if(ascii)
+                                Draw_DrawFormattedString(x, y, color, "%c ", u8ToChar(val));
+                            else
+                                Draw_DrawFormattedString(x, y, color, "%.2x", val);
                         }
                         else
                             Draw_DrawString(x, y, COLOR_WHITE, "  ");
@@ -514,6 +540,8 @@ static void ProcessListMenu_MemoryViewer(const ProcessInfo *info)
                     ProcessListMenu_DumpMemory(info->name, menus[MENU_MODE_NORMAL].buf, menus[MENU_MODE_NORMAL].max);
                     clearMenu();
                 }
+                else if(pressed & KEY_START)
+                    ascii = !ascii;
 
                 if(editing)
                 {
