@@ -1,6 +1,6 @@
 /*
 *   This file is part of Luma3DS
-*   Copyright (C) 2016-2020 Aurora Wright, TuxSH
+*   Copyright (C) 2016-2021 Aurora Wright, TuxSH
 *
 *   This program is free software: you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -348,7 +348,7 @@ int ctrNandInit(void)
     u8 __attribute__((aligned(4))) temp[0x200];
 
     //Read NCSD header
-    result = firmSource == FIRMWARE_SYSNAND ? sdmmc_nand_readsectors(0, 1, temp) : sdmmc_sdcard_readsectors(emuHeader, 1, temp);
+    result = firmSource == FIRMWARE_SYSNAND ? sdmmc_nand_readsectors(0, 1, temp) : sdmmc_sdcard_readsectors(emuOffset + emuHeader, 1, temp);
 
     if(!result)
     {
@@ -603,7 +603,7 @@ void kernel9Loader(Arm9Bin *arm9Section)
     aes_use_keyslot(arm9BinSlot);
     aes(startOfArm9Bin, startOfArm9Bin, arm9SectionSize / AES_BLOCK_SIZE, arm9BinCtr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
 
-    if(*startOfArm9Bin != 0x47704770 && *startOfArm9Bin != 0xB0862000) error("Fallo al desencriptar el binario Arm9.");
+    if(*startOfArm9Bin != 0x47704770 && *startOfArm9Bin != 0xB0862000) error("Failed to decrypt the Arm9 binary.");
 }
 
 void computePinHash(u8 *outbuf, const u8 *inbuf)

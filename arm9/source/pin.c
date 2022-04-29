@@ -54,7 +54,7 @@ void newPin(bool allowSkipping, u32 pinMode)
 
     u8 length = 4 + 2 * (pinMode - 1);
 
-    drawString(true, 10, 10, COLOR_TITLE, "Ingresa un nuevo PIN usando ABXY y la cruceta");
+    drawString(true, 10, 10, COLOR_TITLE, "Pon un nuevo PIN usando ABXY y la cruceta");
     drawString(true, 10, 10 + SPACING_Y, COLOR_TITLE, allowSkipping ? "Pulsa START para saltar, SELECT para resetear" : "Pulsa SELECT para resetear");
 
     drawFormattedString(true, 10, 10 + 3 * SPACING_Y, COLOR_WHITE, "PIN (%u digitos): ", length);
@@ -122,7 +122,7 @@ void newPin(bool allowSkipping, u32 pinMode)
     memcpy(pin.hash, tmp, sizeof(tmp));
 
     if(!fileWrite(&pin, PIN_FILE, sizeof(PinData)))
-        error("Error al escribir archivo de PIN");
+        error("Error escribiendo arch. de PIN");
 }
 
 bool verifyPin(u32 pinMode)
@@ -148,10 +148,10 @@ bool verifyPin(u32 pinMode)
 
     swapFramebuffers(true);
 
-    drawString(true, 10, 10, COLOR_TITLE, "Mete un PIN usando ABXY y el D-PAD para seguir");
+    drawString(true, 10, 10, COLOR_TITLE, "Pon el PIN usando ABXY y la cruceta para proceder");
     drawString(true, 10, 10 + SPACING_Y, COLOR_TITLE, "Pulsa START para apagar, SELECT para borrar");
 
-    drawFormattedString(true, 10, 10 + 3 * SPACING_Y, COLOR_WHITE, "PIN (%u digits): ", lengthBlock[0]);
+    drawFormattedString(true, 10, 10 + 3 * SPACING_Y, COLOR_WHITE, "PIN (%u digitos): ", lengthBlock[0]);
 
     bool isBottomSplashValid = getFileSize("splashpin.bin") == SCREEN_BOTTOM_FBSIZE;
     if(isBottomSplashValid)
@@ -225,7 +225,7 @@ bool verifyPin(u32 pinMode)
         {
             reset = true;
 
-            drawString(true, 10, 10 + 5 * SPACING_Y, COLOR_RED, "PIN erroneo, intentelo de nuevo");
+            drawString(true, 10, 10 + 5 * SPACING_Y, COLOR_RED, "PIN equivocado, intentalo de nuevo");
         }
     }
 

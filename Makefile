@@ -3,7 +3,7 @@ $(error "Please install firmtool v1.1 or greater")
 endif
 
 NAME		:=	$(notdir $(CURDIR))
-REVISION	:=	v10.2.1 ESP
+REVISION	:=	v10.3 ESP
 
 SUBFOLDERS	:=	sysmodules arm11 arm9 k11_extension
 
@@ -27,7 +27,7 @@ boot.firm:	$(SUBFOLDERS)
 	@echo built... $(notdir $@)
 
 boot.3dsx:
-	@curl -sSL "https://github.com/fincs/new-hbmenu/releases/latest/download/boot.3dsx" -o "$@"
+	@curl -sSfLO "https://github.com/fincs/new-hbmenu/releases/latest/download/$@"
 	@echo downloaded... $(notdir $@)
 
 $(SUBFOLDERS):

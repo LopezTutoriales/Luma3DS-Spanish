@@ -117,7 +117,7 @@ void main(int argc, char **argv, u32 magicWord)
     memcpy(__itcm_start__, __itcm_lma__, __itcm_bss_start__ - __itcm_start__);
     memset(__itcm_bss_start__, 0, __itcm_end__ - __itcm_bss_start__);
     I2C_init();
-    if(isInvalidLoader) error("Lanzado con un cargador incompatible.");
+    if(isInvalidLoader) error("Lanzado con un cargador no compatible.");
 
     installArm9Handlers();
 
@@ -153,7 +153,7 @@ void main(int argc, char **argv, u32 magicWord)
             mountPoint[i] = (char)launchedPath[i];
         mountPoint[i] = 0;
 
-        error("Lanzado desde ubicacion no permitida: %s.", mountPoint);
+        error("Lanzado desde ubicacion no admitida: %s.", mountPoint);
     }
 
     detectAndProcessExceptionDumps();
@@ -345,7 +345,7 @@ boot:
         locateEmuNand(&nandType);
         if(nandType == FIRMWARE_SYSNAND) firmSource = FIRMWARE_SYSNAND;
         else if((*(vu16 *)(SDMMC_BASE + REG_SDSTATUS0) & TMIO_STAT0_WRPROTECT) == 0) //Make sure the SD card isn't write protected
-            error("Tarjeta SD bloqueada, No se puede usar EmuNAND.\nMueva el interruptor de permisos de\nescritura a apagado.");
+            error("La SD esta bloqueada, EmuNAND no se puede usar.\nApague el interruptor de protec. contra escrit.");
     }
 
     //Same if we're using EmuNAND as the FIRM source
@@ -381,7 +381,7 @@ boot:
             break;
     }
 
-    if(res != 0) error("Fallo al aplicar %u parche(s) de FIRM.", res);
+    if(res != 0) error("Fallo al aplicar %u parche(s) al FIRM.", res);
 
     if(bootType != FIRMLAUNCH) deinitScreens();
     launchFirm(0, NULL);

@@ -1,6 +1,6 @@
 /*
 *   This file is part of Luma3DS
-*   Copyright (C) 2016-2020 Aurora Wright, TuxSH
+*   Copyright (C) 2016-2021 Aurora Wright, TuxSH
 *
 *   This program is free software: you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -154,10 +154,11 @@ bool findPayload(char *path, u32 pressed)
     return true;
 }
 
-bool payloadMenu(char *path)
+bool payloadMenu(char *path, bool *hasDisplayedMenu)
 {
     DIR dir;
 
+    *hasDisplayedMenu = false;
     if(f_opendir(&dir, "payloads") != FR_OK) return false;
 
     FILINFO info;
@@ -189,9 +190,10 @@ bool payloadMenu(char *path)
     if(payloadNum != 1)
     {
         initScreens();
+        *hasDisplayedMenu = true;
 
-        drawString(true, 10, 10, COLOR_TITLE, "Luma3DS - cargador de payloads");
-        drawString(true, 10, 10 + SPACING_Y, COLOR_TITLE, "Pulsa A para seleccionar, START para quitar");
+        drawString(true, 10, 10, COLOR_TITLE, "Luma3DS - Cargador de payloads");
+        drawString(true, 10, 10 + SPACING_Y, COLOR_TITLE, "Pulsa A para seleccionar, START para salir");
 
         for(u32 i = 0, posY = 10 + 3 * SPACING_Y, color = COLOR_RED; i < payloadNum; i++, posY += SPACING_Y)
         {

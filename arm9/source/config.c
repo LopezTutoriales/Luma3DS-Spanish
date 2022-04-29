@@ -74,7 +74,7 @@ void writeConfig(bool isConfigOptions)
     }
 
     if(!fileWrite(&configData, CONFIG_FILE, sizeof(CfgData)))
-        error("Error al escribir archivo de configuracion");
+        error("Error escribiendo arch. de configuracion");
 }
 
 void configMenu(bool oldPinStatus, u32 oldPinMode)
@@ -84,11 +84,11 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                "Splash: Apagada( ) Antes( ) Despues( ) payloads",
                                                "Duracion de Splash: 1( ) 3( ) 5( ) 7( ) segundos",
                                                "PIN: Apagado( ) 4( ) 6( ) 8( ) digitos",
-                                               "CPU New 3DS: Apag.( ) Clock( ) L2( ) Clock+L2( )",
+                                               "CPU New 3DS: Off( ) Clock( ) L2( ) Clock+L2( )",
                                              };
 
     static const char *singleOptionsText[] = { "( ) Autoiniciar EmuNAND",
-                                               "( ) Usar EmuNAND si enciendes con R",
+                                               "( ) Usar FIRM EmuNAND si enciendes con R",
                                                "( ) Habilitar cargar modulos y FIRMs externos",
                                                "( ) Habilitar parcheo de juegos",
                                                "( ) Mostrar NAND o texto personalizado en Conf.",
@@ -101,11 +101,10 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
     static const char *optionsDescription[]  = { "Seleccionar EmuNAND por defecto.\n\n"
                                                  "Esta arrancara cuando no\n"
                                                  "este pulsada ninguna direccion en la\n"
-												 "cruceta (D-Pad).",
+												 "cruceta (D-Pad)",
 
                                                  "Seleccionar el brillo de la pantalla.\n"
-												 "4 -> Nivel mas alto\n"
-												 "1 -> Nivel mas bajo",
+												 "4 -> Brillo mas alto\n1 -> Brillo mas bajo",
 
                                                  "Habilitar pantalla de splash.\n\n"
                                                  "\t* 'Antes de payloads' La muestra\n"
@@ -113,8 +112,9 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "(destinado a pantallas de splash que\n"
                                                  "muestran sugerencias de botones).\n\n"
                                                  "\t* 'Despues de payloads' La muestra\n"
-                                                 "despues de los payloads (si se carga\n"
-												 "alguno).",
+                                                 "despues de los payloads.\n\n"
+                                                 "Edita la duracion en el archivo\n"
+                                                 "config.ini (3s por defecto).",
 
                                                  "Selecciona cuanto tiempo durara la\n"
                                                  "pantalla de splash.\n\n"
@@ -124,15 +124,14 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "Activar bloqueo por PIN.\n\n"
                                                  "Se pedira el pin cada vez que Luma3DS\n"
                                                  "arranque.\n\n"
-                                                 "Se pueden seleccionar 4, 6 u 8 digitos\n\n"
+                                                 "Puedes seleccionar 4, 6 u 8 digitos.\n\n"
                                                  "Los botones ABXY y la cruceta (D-Pad)\n"
                                                  "pueden ser usados como botones de\n"
 												 "bloqueo.\n\n"
                                                  "Tambien se puede mostrar un mensaje\n"
-                                                 "(Consultar la wiki para instrucciones)\n"
-												 "www.github.com/LumaTeam/Luma3DS/wiki",
+                                                 "(Consultar la wiki para instrucciones)",
 
-                                                 "Seleccionar el modo de CPU en New 3DS\n\n"
+                                                 "Seleccionar el modo de CPU en New 3DS.\n\n"
                                                  "Esto no se aplicara a los juegos\n"
                                                  "exclusivos/mejorados de New 3DS.\n\n"
                                                  "La opcion 'Clock+L2' puede causar\n"
@@ -140,41 +139,39 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
 
                                                  "Si esta habilitado, se lanzara una\n"
                                                  "EmuNAND al arrancar.\n\n"
-                                                 "En caso contrario, se lanzara SysNAND\n\n"
-                                                 "Manten pulsado L en el arranque para\n"
-												 "cambiar de NAND\n\n"
-                                                 "Para usar una EmuNAND diferente a la\n"
-                                                 "por defecto, manten pulsado (Arriba/\n"
-                                                 "Derecha/Abajo/Izquierda igual a\n"
-                                                 "EmuNANDs 1/2/3/4).",
+                                                 "En caso contrario, se lanzara SysNAND.\n\n"
+                                                 "Manten L al arrancar para cambiar NAND.\n\n"
+                                                 "Para usar una EmuNAND diferente de la\n"
+                                                 "predeterminada, manten la cruceta\n"
+                                                 "(Arriba/Derecha/Abajo/Izquierda es\n"
+                                                 "igual a las EmuNANDS 1/2/3/4).",
 
                                                  "Si esta habilitado, cuando mantengas\n"
-                                                 "R en el arranque, arrancara la\n"
-                                                 "SysNAND con un FIRM EmuNAND.\n\n"
+                                                 "R en el arranque, arrancara la SysNAND\n"
+                                                 "con un FIRM EmuNAND.\n\n"
                                                  "En caso contrario, se lanzara una\n"
                                                  "EmuNAND con un FIRM SysNAND.\n\n"
-                                                 "Para usar una EmuNAND diferente a la\n"
-                                                 "por defecto, manten pulsado (Arriba/\n"
-                                                 "Derecha/Abajo/Izquierda igual a\n"
-                                                 "EmuNANDs 1/2/3/4), agrega el boton A\n"
-                                                 "si quieres lanzar un payload.",
+                                                 "Para usar una EmuNAND diferente de la\n"
+                                                 "predeterminada, manten la cruceta\n"
+                                                 "Arriba/Derecha/Abajo/Izquierda es\n"
+                                                 "igual a las EmuNANDS 1/2/3/4), agrega\n"
+                                                 "el boton A si quieres lanzar un\n"
+												 "payload.",
 
                                                  "Habilita la carga de FIRMs y modulos\n"
                                                  "de sistema externos.\n\n"
                                                  "Esto no es necesario en la mayoria de\n"
-												 "los casos.\n\n"
-                                                 "(Consultar la wiki para instrucciones)\n"
-												 "www.github.com/LumaTeam/Luma3DS/wiki",
+                                                 "los casos.\n\n"
+												 "(Consultar la wiki para instrucciones)",
 
-                                                 "Deshabilita la configuracion de idioma\n"
-                                                 "y region, y el uso de binarios de\n"
+                                                 "Habilita sobrescribir la configuracion\n"
+                                                 "de region e idioma y permite el uso de\n"
                                                  "codigo parcheado, exHeaders, parches\n"
                                                  "de codigo IPS y LayeredFS para juegos\n"
-                                                 "especificos.\n\n"
-                                                 "Tambien hace que ciertos DLCs\n"
-                                                 "para juegos de otra region funcionen.\n\n"
-                                                 "(Consultar la wiki para instrucciones)\n"
-												 "www.github.com/LumaTeam/Luma3DS/wiki",
+												 "especificos.\n\n"
+                                                 "Tambien hace que ciertos DLCs para\n"
+                                                 "juegos de otra region funcionen.\n\n"
+                                                 "(Consultar la wiki para instrucciones)",
 
                                                  "Muestra la NAND/FIRM actual:\n\n"
                                                  "\t* Sys  = SysNAND\n"
@@ -186,8 +183,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "\t* EmXS = EmuNAND X con SysNAND FIRM\n\n"
                                                  "o un texto personalizado por el\n"
                                                  "usuario en la Configuracion de Sistema\n\n"
-                                                 "(Consultar la wiki para instrucciones)\n"
-												 "www.github.com/LumaTeam/Luma3DS/wiki",
+                                                 "(Consultar la wiki para instrucciones)",
 
                                                  "Muestra la pantalla de arranque de GBA\n"
                                                  "cuando se lanzan juegos de GBA.",
@@ -196,10 +192,11 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "como unidad de desarrollo y viceversa.\n"
                                                  "(lo cual hace que no funcionen los\n"
                                                  "servicios en linea, amiibos y los CIAs\n"
-                                                 "retail, pero permite instalar arrancar\n"
-												 "algunos programas de desarrollo.\n\n"
+                                                 "retail, pero permite instalar y\n"
+												 "arrancar algunos programas de\n"
+												 "desarrollo.\n\n"
                                                  "Selecciona esta opcion solo SI SABES\n"
-                                                 "LO QUE ESTAS HACIENDO",
+                                                 "SI SABES LO QUE ESTAS HACIENDO",
 
                                                  "Desactiva los controladores de\n"
                                                  "excepciones de errores fatales para\n"
@@ -282,7 +279,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
     initScreens();
 
     static const char *bootTypes[] = { "B9S",
-                                       "B9S (ntrboot)",
+                                       "B9S (NTRBoot)",
                                        "FIRM0",
                                        "FIRM1" };
 
@@ -447,7 +444,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
     else if(oldPinStatus)
     {
         if(!fileDelete(PIN_FILE))
-            error("Fallo al borrar archivo de PIN");
+            error("Fallo al borrar arch. de PIN");
     }
 
     while(HID_PAD & PIN_BUTTONS);
