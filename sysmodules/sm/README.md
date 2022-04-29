@@ -1,9 +1,9 @@
 # 3ds_sm
-Open source replacement of the Arm11 SM system module.
-This is licensed under the MIT license.
+Reemplazo de código abierto del módulo del sistema Arm11 SM.
+Esto está autorizado bajo la licencia MIT.
 
-# Usage
-To run this system module, use a recent release or commit of [Luma3DS](https://github.com/LumaTeam/Luma3DS/), build this project and copy sm.cxi to /luma/sysmodules/.
+# Uso
+Para ejecutar este módulo del sistema, use una versión reciente o confirmación de [Luma3DS](https://github.com/LumaTeam/Luma3DS/), cree este proyecto y copie sm.cxi a /luma/sysmodules/.
 
-# Credits
-Everyone that helped me fix some of stupid bugs I had been making: @fincs, @Hikari-chin, etc.
+# Creditos
+Todos los que me ayudaron a solucionar algunos errores estúpidos que había estado cometiendo: @fincs, @Hikari-chin, etc.

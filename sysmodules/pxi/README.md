@@ -1,15 +1,15 @@
 # 3ds_pxi
-Open source replacement of the Arm11 PXI system module.
-This is licensed under the MIT license.
+Reemplazo de código abierto del módulo del sistema Arm11 PXI.
+Esto está autorizado bajo la licencia MIT.
 
-# Usage
-To run this system module, use a recent release or commit of [Luma3DS](https://github.com/LumaTeam/Luma3DS/) and copy pxi.cxi to /luma/sysmodules/.
+# Uso
+Para ejecutar este módulo del sistema, use una versión reciente o confirmación de [Luma3DS](https://github.com/LumaTeam/Luma3DS/) y copie pxi.cxi a /luma/sysmodules/.
 
-# Credits
-This list is not complete at all:
+# Creditos
+La lista no es completa del todo:
 
-* @Subv, for the process patch that used to be used in Luma3DS which I modified to assist me in PXI sysmodule reverse-engineering
-* @yifanlu, for the work his own work on loader
-* @Mrrraou, for intensive testing back in June/July 2016
-* @jackron, for makerom support and help
-* Many #Cakey and #3dsdev folks I haven't mentioned here, etc.
+* @Subv, para el parche de proceso que solía usarse en Luma3DS que modifiqué para ayudarme en la ingeniería inversa de PXI sysmodule
+* @yifanlu, por el trabajo de su propio trabajo en el cargador
+* @Mrrraou, para pruebas intensivas en junio/julio de 2016
+* @jackron, por el apoyo y la ayuda de makerom
+* Mucha gente de #Cakey y #3dsdev que no he mencionado aquí, etc.

@@ -28,12 +28,9 @@ static u32 patchMemory(u8 *start, u32 size, const void *pattern, u32 patSize, s3
     return i;
 }
 
-Result fileOpen(IFile *file, FS_ArchiveID archiveId, const char *path, int flags)
+static Result fileOpen(IFile *file, FS_ArchiveID archiveId, const char *path, u32 flags)
 {
-    FS_Path filePath = {PATH_ASCII, strnlen(path, 255) + 1, path},
-            archivePath = {PATH_EMPTY, 1, (u8 *)""};
-
-    return IFile_Open(file, archiveId, archivePath, filePath, flags);
+    return IFile_Open(file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, path), flags);
 }
 
 static bool dirCheck(FS_ArchiveID archiveId, const char *path)
@@ -41,13 +38,11 @@ static bool dirCheck(FS_ArchiveID archiveId, const char *path)
     bool ret;
     Handle handle;
     FS_Archive archive;
-    FS_Path dirPath = {PATH_ASCII, strnlen(path, 255) + 1, path},
-            archivePath = {PATH_EMPTY, 1, (u8 *)""};
 
-    if(R_FAILED(FSUSER_OpenArchive(&archive, archiveId, archivePath))) ret = false;
+    if(R_FAILED(FSUSER_OpenArchive(&archive, archiveId, fsMakePath(PATH_EMPTY, "")))) ret = false;
     else
     {
-        ret = R_SUCCEEDED(FSUSER_OpenDirectory(&handle, archive, dirPath));
+        ret = R_SUCCEEDED(FSUSER_OpenDirectory(&handle, archive, fsMakePath(PATH_ASCII, path)));
         if(ret) FSDIR_Close(handle);
         FSUSER_CloseArchive(archive);
     }
@@ -519,7 +514,7 @@ static inline bool patchLayeredFs(u64 progId, u8 *code, u32 size, u32 textSize, 
     //Locate update RomFSes
     for(updateRomFsIndex = 0; updateRomFsIndex < sizeof(updateRomFsMounts) / sizeof(char *) - 1; updateRomFsIndex++)
     {
-        u32 patternSize = strnlen(updateRomFsMounts[updateRomFsIndex], 255);
+        u32 patternSize = strlen(updateRomFsMounts[updateRomFsIndex]);
         u8 temp[7];
         temp[0] = 0;
         memcpy(temp + 1, updateRomFsMounts[updateRomFsIndex], patternSize);
@@ -553,12 +548,14 @@ static inline bool patchLayeredFs(u64 progId, u8 *code, u32 size, u32 textSize, 
 
 void patchCode(u64 progId, u16 progVer, u8 *code, u32 size, u32 textSize, u32 roSize, u32 dataSize, u32 roAddress, u32 dataAddress)
 {
-    if(progId == 0x0004003000008F02LL || //USA Home Menu
-       progId == 0x0004003000008202LL || //JPN Home Menu
-       progId == 0x0004003000009802LL || //EUR Home Menu
-       progId == 0x000400300000A902LL || //KOR Home Menu
-       progId == 0x000400300000A102LL || //CHN Home Menu
-       progId == 0x000400300000B102LL) //TWN Home Menu
+    bool isHomeMenu = progId == 0x0004003000008F02LL || //USA Home Menu
+                      progId == 0x0004003000008202LL || //JPN Home Menu
+                      progId == 0x0004003000009802LL || //EUR Home Menu
+                      progId == 0x000400300000A902LL || //KOR Home Menu
+                      progId == 0x000400300000A102LL || //CHN Home Menu
+                      progId == 0x000400300000B102LL;   //TWN Home Menu
+
+    if(isHomeMenu)
     {
         bool applyRegionFreePatch = true;
 
@@ -834,10 +831,10 @@ void patchCode(u64 progId, u16 progVer, u8 *code, u32 size, u32 textSize, u32 ro
                 patch,
                 sizeof(patch), 1
             )) goto error;
-        
+
         // Patch DLP client region check
         u8 *found = memsearch(code, pattern2, textSize, sizeof(pattern2));
-        
+
         if (!patchMemory(found, textSize,
                pattern3,
                sizeof(pattern3), 1,
@@ -869,7 +866,7 @@ void patchCode(u64 progId, u16 progVer, u8 *code, u32 size, u32 textSize, u32 ro
         if(!patcherApplyCodeBpsPatch(progId, code, size)) goto error;
         if(!applyCodeIpsPatch(progId, code, size)) goto error;
 
-        if((u32)((progId >> 0x20) & 0xFFFFFFEDULL) == 0x00040000)
+        if((u32)((progId >> 0x20) & 0xFFFFFFEDULL) == 0x00040000 || isHomeMenu)
         {
             u8 mask,
                regionId,

@@ -1,30 +1,30 @@
 3DS Loader Replacement
 ======================
 
-This is an open source implementation of 3DS `loader` system module--with 
-additional features. The current aim of the project is to provide a nice 
-entry point for patching 3DS modules.
+Esta es una implementación de código abierto del módulo del sistema `loader` de 3DS, con
+características adicionales. El objetivo actual del proyecto es proporcionar un buen
+punto de entrada para parchear módulos de 3DS.
 
-## Roadmap
-Right now, this can serve as an open-source replacement for the built in loader. 
-There is additional support for patching any executable after it's loaded but 
-before it starts. For example, you can patch `menu` to skip region checks and 
-have region free game launching directly from the home menu. There is also 
-support for SDMC reading (not found in original loader implementation) which 
-means that patches can be loaded from the SD card. Ultimately, there would be 
-a patch system that supports easy loading of patches from the SD card.
+## Guía
+En este momento, esto puede servir como un reemplazo de código abierto para el loader incorporado.
+Hay soporte adicional para parchear cualquier ejecutable después de cargarlo, pero
+antes de que comience. Por ejemplo, puede parchear `menu` para omitir las comprobaciones de región y
+hacer que el juego libre de la región se inicie directamente desde el menú de inicio. También hay
+soporte para lectura SDMC (no encontrado en la implementación del loader original) que
+significa que los parches se pueden cargar desde la tarjeta SD. En definitiva, habría
+un sistema de parches que admite la carga sencilla de parches desde la tarjeta SD.
 
-## Build
-You need a working 3DS build environment with a fairly recent copy of devkitARM, 
-ctrulib, and makerom. If you see any errors in the build process, it's likely 
-that you're using an older version.
+## Build (Crear)
+Necesita un entorno de compilación 3DS que funcione con una copia bastante reciente de devkitARM,
+ctrulib y makerom. Si ve algún error en el proceso de compilación, es probable que
+que está utilizando una versión anterior.
 
-Currently, there is no support for FIRM building, so you need to do some steps 
-manually. First, you have to add padding to make sure the NCCH is of the right 
-size to drop in as a replacement. A hacky way is 
-[this patch](http://pastebin.com/nyKXLnNh) which adds junk data. Play around 
-with the size value to get the NCCH to be the exact same size as the one 
-found in your decrypted FIRM dump.
+Actualmente, no hay soporte para la creación de FIRM, por lo que debe realizar algunos pasos
+a mano. Primero, debe agregar relleno para asegurarse de que el NCCH sea correcto
+tamaño para colocar como reemplazo. Una manera hacky es
+[este parche](http://pastebin.com/nyKXLnNh) que agrega datos basura. Jugar
+con el valor de tamaño para que el NCCH tenga exactamente el mismo tamaño que el
+encontrado en su volcado FIRM descifrado.
 
-Once you have a NCCH of the right size, just replace it in your decrypted FIRM 
-and find a way to launch it (for example with ReiNAND).
+Una vez que tenga un NCCH del tamaño correcto, simplemente reemplácelo en su FIRMA descifrada
+y encuentre una forma de iniciarlo (por ejemplo, con ReiNAND).
