@@ -3,7 +3,7 @@ $(error "Please install firmtool v1.1 or greater")
 endif
 
 NAME		:=	$(notdir $(CURDIR))
-REVISION	:=	v10.3 ESP
+REVISION	:=	$(shell git describe --tags --match v[0-9]* --abbrev=8 | sed 's/-[0-9]*-g/-/')
 
 SUBFOLDERS	:=	sysmodules arm11 arm9 k11_extension
 
