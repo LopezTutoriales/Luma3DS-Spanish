@@ -9,17 +9,17 @@ endif
 TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/base_rules
 
-export REVISION			:=	v10.3 ESP
-export VERSION_MAJOR	:=	10
-export VERSION_MINOR	:=	3
-export VERSION_BUILD	:=	0
-export COMMIT			:=	0
-export IS_RELEASE		:=	1
+export REVISION			:=	$(shell git describe --tags --match v[0-9]* --abbrev=8 | sed 's/-[0-9]*-g/-/')
+export VERSION_MAJOR	:=	$(shell git describe --tags --match v[0-9]* | cut -c2- | cut -f1 -d- | cut -f1 -d.)
+export VERSION_MINOR	:=	$(shell git describe --tags --match v[0-9]* | cut -c2- | cut -f1 -d- | cut -f2 -d.)
+export VERSION_BUILD	:=	$(shell git describe --tags --match v[0-9]* | cut -c2- | cut -f1 -d- | cut -f3 -d.)
+export COMMIT			:=	$(shell git rev-parse --short=8 HEAD)
+export IS_RELEASE		:=	0
 
 ifeq ($(strip $(REVISION)),)
-	export REVISION			:=	v10.3 ESP
-	export VERSION_MAJOR	:=	10
-	export VERSION_MINOR	:=	3
+	export REVISION			:=	v0.0.0-0
+	export VERSION_MAJOR	:=	0
+	export VERSION_MINOR	:=	0
 	export VERSION_BUILD	:=	0
 endif
 
@@ -28,7 +28,7 @@ ifeq ($(strip $(COMMIT)),)
 endif
 
 ifeq ($(strip $(VERSION_BUILD)),)
-	export VERSION_BUILD	:=	1
+	export VERSION_BUILD	:=	0
 endif
 
 ifeq ($(strip $(shell git describe --tags --match v[0-9]* | grep -)),)
@@ -159,13 +159,19 @@ $(OUTPUT).elf	:	$(OFILES)
 $(OFILES_SRC)	: $(HFILES_BIN)
 
 memory.o strings.o:	CFLAGS +=	-O3
-config.o:			CFLAGS +=	-DCONFIG_TITLE="\"$(APP_TITLE) $(REVISION) - Configuracion\""
-patches.o:			CFLAGS +=	-DVERSION_MAJOR="$(VERSION_MAJOR)" -DVERSION_MINOR="$(VERSION_MINOR)"\
+patches.o config.o:	CFLAGS +=	-DCONFIG_TITLE="\"$(APP_TITLE) $(REVISION) ESP - Configuracion\""\
+								-DVERSION_MAJOR="$(VERSION_MAJOR)" -DVERSION_MINOR="$(VERSION_MINOR)"\
 								-DVERSION_BUILD="$(VERSION_BUILD)" -DISRELEASE="$(IS_RELEASE)" -DCOMMIT_HASH="0x$(COMMIT)"
+config.o ini.o:		CFLAGS +=	-DINI_HANDLER_LINENO=1 -DINI_STOP_ON_FIRST_ERROR=1
 #---------------------------------------------------------------------------------
 # you need a rule like this for each extension you use as binary data
 #---------------------------------------------------------------------------------
 %.bin.o	%_bin.h :	%.bin
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
+#---------------------------------------------------------------------------------
+%.ini.o	%_ini.h:	%.ini
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
