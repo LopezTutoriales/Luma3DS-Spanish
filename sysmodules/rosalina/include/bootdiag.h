@@ -1,6 +1,6 @@
 /*
 *   This file is part of Luma3DS
-*   Copyright (C) 2016-2020 Aurora Wright, TuxSH
+*   Copyright (C) 2022  TuxSH
 *
 *   This program is free software: you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -25,24 +25,6 @@
 */
 
 #pragma once
+#include "MyThread.h"
 
-#include "menu.h"
-
-extern Menu screenFiltersMenu;
-
-extern int screenFiltersCurrentTemperature;
-
-void ScreenFiltersMenu_SetCct(int cct);
-void ScreenFiltersMenu_RestoreCct(void);
-
-void ScreenFiltersMenu_SetDefault(void);            // 6500K (default)
-
-void ScreenFiltersMenu_SetAquarium(void);           // 10000K
-void ScreenFiltersMenu_SetOvercastSky(void);        // 7500K
-void ScreenFiltersMenu_SetDaylight(void);           // 5500K
-void ScreenFiltersMenu_SetFluorescent(void);        // 4200K
-void ScreenFiltersMenu_SetHalogen(void);            // 3400K
-void ScreenFiltersMenu_SetIncandescent(void);       // 2700K
-void ScreenFiltersMenu_SetWarmIncandescent(void);   // 2300K
-void ScreenFiltersMenu_SetCandle(void);             // 1900K
-void ScreenFiltersMenu_SetEmber(void);              // 1200K
+MyThread *bootdiagCreateThread(void);
