@@ -39,6 +39,7 @@ Menu sysconfigMenu = {
         { "Alternar LEDs", METHOD, .method = &SysConfigMenu_ToggleLEDs },
         { "Alternar adaptador Wifi", METHOD, .method = &SysConfigMenu_ToggleWireless },
         { "Alternar boton Power", METHOD, .method=&SysConfigMenu_TogglePowerButton },
+        { "Alternar alimentacion del slot de cartucho", METHOD, .method=&SysConfigMenu_ToggleCardIfPower},
         {},
     }
 };
@@ -60,7 +61,7 @@ void SysConfigMenu_ToggleLEDs(void)
         Draw_DrawString(10, 50, COLOR_RED, "ADVERTENCIA:");
         Draw_DrawString(10, 60, COLOR_WHITE, "  * El modo reposo reseteara el estado de los LEDs!");
         Draw_DrawString(10, 70, COLOR_WHITE, "  * No se puede alternar los LEDs con la bateria");
-		Draw_DrawString(10, 80, COLOR_WHITE, "    baja!");
+		Draw_DrawString(10, 80, COLOR_WHITE, "  * baja!");
 
         Draw_FlushFramebuffer();
         Draw_Unlock();
@@ -140,7 +141,7 @@ void SysConfigMenu_UpdateStatus(bool control)
     }
     else
     {
-        item->title = "Disable forced wireless connection";
+        item->title = "Desactivar conexion inalambrica forzada";
         item->method = &SysConfigMenu_DisableForcedWifiConnection;
     }
 }
@@ -331,6 +332,49 @@ void SysConfigMenu_DisableForcedWifiConnection(void)
 
         u32 pressed = waitInputWithTimeout(1000);
         if(pressed & KEY_B)
+            return;
+    }
+    while(!menuShouldExit);
+}
+
+void SysConfigMenu_ToggleCardIfPower(void)
+{
+    Draw_Lock();
+    Draw_ClearFramebuffer();
+    Draw_FlushFramebuffer();
+    Draw_Unlock();
+
+    bool cardIfStatus = false;
+    bool updatedCardIfStatus = false;
+
+    do
+    {
+        Result res = FSUSER_CardSlotGetCardIFPowerStatus(&cardIfStatus);
+        if (R_FAILED(res)) cardIfStatus = false;
+
+        Draw_Lock();
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de configuracion del sistema");
+        u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para cambiar, pulsa B para volver.\n\n");
+        posY = Draw_DrawString(10, posY, COLOR_WHITE, "Insertar o quitar un cartucho reseteara el estado,\nY necesitaras reinsertar el cartucho si quieres\njugar con el.\n\n");
+        Draw_DrawString(10, posY, COLOR_WHITE, "Estado actual:");
+        Draw_DrawString(100, posY, !cardIfStatus ? COLOR_RED : COLOR_GREEN, !cardIfStatus ? " DESACTIVADO" : " ACTIVADO ");
+
+        Draw_FlushFramebuffer();
+        Draw_Unlock();
+
+        u32 pressed = waitInputWithTimeout(1000);
+
+        if(pressed & KEY_A)
+        {
+            if (!cardIfStatus)
+                res = FSUSER_CardSlotPowerOn(&updatedCardIfStatus);
+            else
+                res = FSUSER_CardSlotPowerOff(&updatedCardIfStatus);
+
+            if (R_SUCCEEDED(res))
+                cardIfStatus = !updatedCardIfStatus;
+        }
+        else if(pressed & KEY_B)
             return;
     }
     while(!menuShouldExit);

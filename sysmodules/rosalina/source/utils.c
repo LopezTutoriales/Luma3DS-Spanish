@@ -49,7 +49,7 @@ void formatUserMemoryState(char *outbuf, MemState state)
     {
         "Libre",
         "Reservado",
-        "IO",
+        "E/S",
         "Estatico",
         "Codigo",
         "Privado",
@@ -57,7 +57,7 @@ void formatUserMemoryState(char *outbuf, MemState state)
         "Continuo",
         "Alias",
         "Alias",
-        "CodigoDeAlias",
+        "CodAlias",
         "Bloqueado"
     };
 
