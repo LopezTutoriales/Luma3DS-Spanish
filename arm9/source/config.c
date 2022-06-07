@@ -47,7 +47,7 @@ ConfigurationStatus needConfig;
 static CfgData oldConfig;
 
 static CfgDataMcu configDataMcu;
-static_assert(sizeof(CfgDataMcu) > 0, "wrong data size");
+static_assert(sizeof(CfgDataMcu) > 0, "Tam. de datos incorrecto");
 
 // INI parsing
 // ===========================================================
@@ -885,7 +885,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
     else if(oldPinStatus)
     {
         if(!fileDelete(PIN_FILE))
-            error("Unable to delete PIN file");
+            error("Error al borrar arch. de PIN");
     }
 
     while(HID_PAD & PIN_BUTTONS);
