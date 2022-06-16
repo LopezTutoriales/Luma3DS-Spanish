@@ -68,14 +68,14 @@ static const char *singleOptionIniNamesMisc[] = {
 };
 
 static const char *keyNames[] = {
-    "A", "B", "Select", "Start", "Right", "Left", "Up", "Down", "R", "L", "X", "Y",
-    "?", "?",
-    "ZL", "ZR",
-    "?", "?", "?", "?",
-    "Touch",
-    "?", "?", "?",
-    "CStick Right", "CStick Left", "CStick Up", "CStick Down",
-    "CPad Right", "CPad Left", "CPad Up", "CPad Down",
+    "A", "B", "Select", "Start", "Derecha", "Izquierda", "Arriba", "Abajo", "R", "L", "X", "Y",
+	"?", "?",
+	"ZL", "ZR",
+	"?", "?", "?", "?",
+	"Touch",
+	"?", "?", "?",
+	"CStick Derecha", "CStick Izquierda", "CStick Arriba", "CStick Abajo",
+	"CPad Derecha", "CPad Izquierda", "CPad Arriba", "CPad Abajo",
 };
 
 static int parseBoolOption(bool *out, const char *val)
