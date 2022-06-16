@@ -105,7 +105,7 @@ typedef struct CfgData {
 Menu miscellaneousMenu = {
     "Menu de opciones Miscelaneas",
     {
-        { "Cambiar esta app por Homebrew Launcher", METHOD, .method = &MiscellaneousMenu_SwitchBoot3dsxTargetTitle },
+        { "Cambiar Homebrew Launcher por esta app", METHOD, .method = &MiscellaneousMenu_SwitchBoot3dsxTargetTitle },
         { "Cambiar botones para abrir Rosalina", METHOD, .method = &MiscellaneousMenu_ChangeMenuCombo },
         { "Iniciar InputRedirection", METHOD, .method = &MiscellaneousMenu_InputRedirection },
         { "Actualizar hora y fecha por internet", METHOD, .method = &MiscellaneousMenu_UpdateTimeDateNtp },
@@ -522,8 +522,8 @@ void MiscellaneousMenu_UpdateTimeDateNtp(void)
 
         input = waitInput();
 
-        if(input & KEY_LEFT) utcOffset = (24 + utcOffset - 1) % 24; // ensure utcOffset >= 0
-        if(input & KEY_RIGHT) utcOffset = (utcOffset + 1) % 24;
+        if(input & KEY_LEFT) utcOffset = (27 + utcOffset - 1) % 27; // ensure utcOffset >= 0
+        if(input & KEY_RIGHT) utcOffset = (utcOffset + 1) % 27;
         if(input & KEY_UP) utcOffsetMinute = (utcOffsetMinute + 1) % 60;
         if(input & KEY_DOWN) utcOffsetMinute = (60 + utcOffsetMinute - 1) % 60;
         Draw_FlushFramebuffer();
