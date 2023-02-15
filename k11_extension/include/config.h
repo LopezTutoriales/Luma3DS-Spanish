@@ -20,7 +20,9 @@ enum multiOptions
     BRIGHTNESS,
     SPLASH,
     PIN,
-    NEWCPU
+    NEWCPU,
+    AUTOBOOTMODE,
+    FORCEAUDIOOUTPUT,
 };
 
 enum singleOptions
@@ -29,6 +31,7 @@ enum singleOptions
     USEEMUFIRM,
     LOADEXTFIRMSANDMODULES,
     PATCHGAMES,
+    REDIRECTAPPTHREADS,
     PATCHVERSTRING,
     SHOWGBABOOT,
     PATCHUNITINFO,

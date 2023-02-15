@@ -1,5 +1,5 @@
 # Luma3DS
-* "Firmware personalizado" (N)3DS a prueba de novatos *
+*"Firmware personalizado" (N)3DS a prueba de novatos*
 
 ### Lo que es
 **Luma3DS** es un programa para parchear el software del sistema de las (nuevas) consolas portátiles Nintendo (2) 3DS "sobre la marcha", agregando funciones como configuraciones de idioma por juego, capacidades de depuración para desarrolladores y eliminando restricciones impuestas por Nintendo como el bloqueo de la región.
