@@ -40,6 +40,7 @@
 #include "fmt.h"
 #include "process_patches.h"
 #include "luminance.h"
+#include "luma_config.h"
 
 Menu rosalinaMenu = {
     "Menu Rosalina",
@@ -53,6 +54,7 @@ Menu rosalinaMenu = {
         { "Filtros de pantalla...", MENU, .menu = &screenFiltersMenu },
         { "Menu de New 3DS...", MENU, .menu = &N3DSMenu, .visibility = &menuCheckN3ds },
         { "Opciones miscelaneas...", MENU, .menu = &miscellaneousMenu },
+        { "Guardar configuracion", METHOD, .method = &RosalinaMenu_SaveSettings },
         { "Apagar", METHOD, .method = &RosalinaMenu_PowerOff },
         { "Reiniciar", METHOD, .method = &RosalinaMenu_Reboot },
         { "Creditos", METHOD, .method = &RosalinaMenu_ShowCredits },
@@ -68,6 +70,28 @@ bool rosalinaMenuShouldShowDebugInfo(void)
     s64 out;
     svcGetSystemInfo(&out, 0x10000, 0x200);
     return out == 0;
+}
+
+void RosalinaMenu_SaveSettings(void)
+{
+    Result res = LumaConfig_SaveSettings();
+    Draw_Lock();
+    Draw_ClearFramebuffer();
+    Draw_FlushFramebuffer();
+    Draw_Unlock();
+
+    do
+    {
+        Draw_Lock();
+        Draw_DrawString(10, 10, COLOR_TITLE, "Guardar configuracion");
+        if(R_SUCCEEDED(res))
+            Draw_DrawString(10, 30, COLOR_WHITE, "Operacion exitosa.");
+        else
+            Draw_DrawFormattedString(10, 30, COLOR_WHITE, "Operacion fallida (0x%08lx).", res);
+        Draw_FlushFramebuffer();
+        Draw_Unlock();
+    }
+    while(!(waitInput() & KEY_B) && !menuShouldExit);
 }
 
 void RosalinaMenu_ShowDebugInfo(void)
@@ -87,13 +111,6 @@ void RosalinaMenu_ShowDebugInfo(void)
 
     u32 kernelVer = osGetKernelVersion();
     FS_SdMmcSpeedInfo speedInfo;
-
-    Handle hm = 0;
-    OpenProcessByName("menu", &hm);
-    s64 out = 0;
-    svcGetHandleInfo(&out, hm, 0);
-    svcCloseHandle(hm);
-    u64 timeToBootHm = 1000u * out / SYSCLOCK_ARM11;
 
     do
     {
@@ -130,11 +147,10 @@ void RosalinaMenu_ShowDebugInfo(void)
                 (int)speedInfo.highSpeedModeEnabled, SYSCLOCK_SDMMC / (1000 * clkDiv)
             );
         }
-        if (timeToBootHm != 0)
         {
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "Tiempo para iniciar Menu Home: %llums\n",
-                timeToBootHm
+                10, posY, COLOR_WHITE, "Tipo de memoria: %lu\n",
+                OS_KernelConfig->app_memtype
             );
         }
         Draw_FlushFramebuffer();
@@ -155,7 +171,7 @@ void RosalinaMenu_ShowCredits(void)
         Draw_Lock();
         Draw_DrawString(10, 10, COLOR_TITLE, "Rosalina -- Creditos de Luma3DS");
 
-        u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, "Luma3DS (c) 2016-2022 AuroraWright, TuxSH") + SPACING_Y;
+        u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, "Luma3DS (c) 2016-2023 AuroraWright, TuxSH") + SPACING_Y;
 
         posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Codigo de carga de 3DSX por fincs");
         posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Codigo de red y funcionalidad GDB basica por Stary");
@@ -169,7 +185,7 @@ void RosalinaMenu_ShowCredits(void)
                 "Especial agradecimiento a:\n"
                 "  fincs, WinterMute, mtheall, piepie62,\n"
                 "  Contribuyentes de Luma3DS y de libctru,\n"
-                "  otras personas"
+                "  Otras personas"
             ));
 
         Draw_FlushFramebuffer();
@@ -387,6 +403,7 @@ void RosalinaMenu_TakeScreenshot(void)
     Result res = 0;
 
     char filename[64];
+    char dateTimeStr[32];
 
     FS_Archive archive;
     FS_ArchiveID archiveId;
@@ -421,64 +438,21 @@ void RosalinaMenu_TakeScreenshot(void)
         FSUSER_CloseArchive(archive);
     }
 
-    // Conversion code adapted from https://stackoverflow.com/questions/21593692/convert-unix-timestamp-to-date-without-system-libs
-    // (original author @gnif under CC-BY-SA 4.0)
-    u32 seconds, minutes, hours, days, year, month;
-    u64 milliseconds = osGetTime();
-    seconds = milliseconds/1000;
-    milliseconds %= 1000;
-    minutes = seconds / 60;
-    seconds %= 60;
-    hours = minutes / 60;
-    minutes %= 60;
-    days = hours / 24;
-    hours %= 24;
+    dateTimeToString(dateTimeStr, osGetTime(), true);
 
-    year = 1900; // osGetTime starts in 1900
-
-    while(true)
-    {
-        bool leapYear = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
-        u16 daysInYear = leapYear ? 366 : 365;
-        if(days >= daysInYear)
-        {
-            days -= daysInYear;
-            ++year;
-        }
-        else
-        {
-            static const u8 daysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-            for(month = 0; month < 12; ++month)
-            {
-                u8 dim = daysInMonth[month];
-
-                if (month == 1 && leapYear)
-                    ++dim;
-
-                if (days >= dim)
-                    days -= dim;
-                else
-                    break;
-            }
-            break;
-        }
-    }
-    days++;
-    month++;
-
-    sprintf(filename, "/luma/screenshots/%04lu-%02lu-%02lu_%02lu-%02lu-%02lu.%03llu_superior.bmp", year, month, days, hours, minutes, seconds, milliseconds);
+    sprintf(filename, "/luma/screenshots/%s_superior.bmp", dateTimeStr);
     TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
     TRY(RosalinaMenu_WriteScreenshot(&file, topWidth, true, true));
     TRY(IFile_Close(&file));
 
-    sprintf(filename, "/luma/screenshots/%04lu-%02lu-%02lu_%02lu-%02lu-%02lu.%03llu_inferior.bmp", year, month, days, hours, minutes, seconds, milliseconds);
+    sprintf(filename, "/luma/screenshots/%s_inferior.bmp", dateTimeStr);
     TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
     TRY(RosalinaMenu_WriteScreenshot(&file, bottomWidth, false, true));
     TRY(IFile_Close(&file));
 
     if(is3d && (Draw_GetCurrentFramebufferAddress(true, true) != Draw_GetCurrentFramebufferAddress(true, false)))
     {
-        sprintf(filename, "/luma/screenshots/%04lu-%02lu-%02lu_%02lu-%02lu-%02lu.%03llu_superior_derecha.bmp", year, month, days, hours, minutes, seconds, milliseconds);
+        sprintf(filename, "/luma/screenshots/%s_sup_der.bmp", dateTimeStr);
         TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
         TRY(RosalinaMenu_WriteScreenshot(&file, topWidth, true, false));
         TRY(IFile_Close(&file));

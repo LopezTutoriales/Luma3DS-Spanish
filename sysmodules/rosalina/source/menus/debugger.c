@@ -72,6 +72,8 @@ MyThread *debuggerCreateDebugThread(void)
 void debuggerFetchAndSetNextApplicationDebugHandleTask(void *argdata)
 {
     (void)argdata;
+    if(!nextApplicationGdbCtx)
+        return;
     Handle debug = 0;
     PMDBG_RunQueuedProcess(&debug);
     GDB_LockAllContexts(&gdbServer);
@@ -177,7 +179,7 @@ void DebuggerMenu_DisableDebugger(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones del Depuracion");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Menu de opciones de Depuracion");
         Draw_DrawString(10, 30, COLOR_WHITE, initialized ? (res == 0 ? "Depurador quitado con exito." : buf) : "Depurador no habilitado.");
         Draw_FlushFramebuffer();
         Draw_Unlock();

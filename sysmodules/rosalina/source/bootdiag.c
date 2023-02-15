@@ -73,7 +73,7 @@ static int bootdiagDumpThread(char *buf, Handle debug, u32 tid)
     u32 mask = 0xFF;
     svcGetDebugThreadParam(&dummy, &mask, debug, tid, DBGTHREAD_PARAMETER_SCHEDULING_MASK_LOW);
 
-    return sprintf(buf, "Hilo %lu -- PC=%08lx LR=%08lx R0=%08lx sched=%lu\n", tid, ctx.cpu_registers.pc, ctx.cpu_registers.lr, ctx.cpu_registers.r[0], mask);
+    return sprintf(buf, "Thread %lu -- PC=%08lx LR=%08lx R0=%08lx sched=%lu\n", tid, ctx.cpu_registers.pc, ctx.cpu_registers.lr, ctx.cpu_registers.r[0], mask);
 }
 
 static int bootdiagDumpProcess(char *buf, u32 pid)

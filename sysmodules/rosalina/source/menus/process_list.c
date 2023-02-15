@@ -58,6 +58,10 @@ static inline int ProcessListMenu_FormatInfoLine(char *out, const ProcessInfo *i
     const char *checkbox;
     GDBContext *ctx = NULL;
 
+    s64 tmp;
+    svcGetSystemInfo(&tmp, 0x10000, 0x200);
+    bool isRelease = tmp != 0;
+
     if(gdbServer.super.running)
     {
         GDB_LockAllContexts(&gdbServer);
@@ -84,15 +88,13 @@ static inline int ProcessListMenu_FormatInfoLine(char *out, const ProcessInfo *i
         else if ((ctx->flags & GDB_FLAG_SELECTED) && (ctx->localPort >= GDB_PORT_BASE && ctx->localPort < GDB_PORT_BASE + MAX_DEBUG))
         {
             checkbox = "(W) ";
-            sprintf(commentBuf, "Puerto: %hu", ctx->localPort);
+            sprintf(commentBuf, "Puerto: %hu           ", ctx->localPort);
         }
     }
 
-    else
+    else if (!isRelease)
     {
-#ifdef ROSALINA_PRINT_PROCESS_CREATION_TIME
-        sprintf(commentBuf, "%lums\n", info->creationTimeMs);
-#endif
+        sprintf(commentBuf, "%lums               \n", info->creationTimeMs);
     }
 
     if (gdbServer.super.running)
@@ -411,19 +413,19 @@ static void ProcessListMenu_MemoryViewer(const ProcessInfo *info)
                 switch(menuMode)
                 {
                     case MENU_MODE_NORMAL:
-                        Draw_DrawString(10 + SPACING_X * 9, instructionsY, COLOR_GREEN, "mover");
+                        Draw_DrawString(10 + SPACING_X * 7, instructionsY, COLOR_GREEN, "Mover");
                         break;
                     case MENU_MODE_GOTO:
-                        Draw_DrawString(10 + SPACING_X * 20, instructionsY, COLOR_GREEN, "saltar");
+                        Draw_DrawString(10 + SPACING_X * 17, instructionsY, COLOR_GREEN, "Saltar");
                         break;
                     case MENU_MODE_SEARCH:
-                        Draw_DrawString(10 + SPACING_X * 31, instructionsY, COLOR_GREEN, "buscar");
+                        Draw_DrawString(10 + SPACING_X * 30, instructionsY, COLOR_GREEN, "Buscar");
                         break;
                     default: break;
                 }
 
                 if(editing)
-                    Draw_DrawString(10 + SPACING_X * 44, instructionsY, COLOR_RED, "editar");
+                    Draw_DrawString(10 + SPACING_X * 41, instructionsY, COLOR_RED, "Editar");
                 // ------------------------------------------
 
                 // Location
@@ -433,9 +435,9 @@ static void ProcessListMenu_MemoryViewer(const ProcessInfo *info)
                 {    
                     Draw_DrawString(10, infoY, COLOR_WHITE, "Pulsar L o R alternara entre pila y codigo.");
                     if((u32)menus[MENU_MODE_NORMAL].buf == heapDestAddress)
-                        Draw_DrawString(10 + SPACING_X * 31, infoY, COLOR_GREEN, "pila");
+                        Draw_DrawString(10 + SPACING_X * 29, infoY, COLOR_GREEN, "pila");
                     if((u32)menus[MENU_MODE_NORMAL].buf == codeDestAddress)
-                        Draw_DrawString(10 + SPACING_X * 40, infoY, COLOR_GREEN, "codigo");
+                        Draw_DrawString(10 + SPACING_X * 36, infoY, COLOR_GREEN, "codigo");
                 }
                 else
                 {
