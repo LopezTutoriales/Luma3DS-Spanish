@@ -142,29 +142,55 @@ static int parseDecIntOption(s64 *out, const char *val, s64 minval, s64 maxval)
 
 static int parseDecFloatOption(s64 *out, const char *val, s64 minval, s64 maxval)
 {
-    char *point = strchrnul(val, '.');
-    if (point == val) {
+    s64 sign = 1;// intPart < 0 ? -1 : 1;
+
+    switch (val[0]) {
+        case '\0':
+            return -1;
+        case '+':
+            ++val;
+            break;
+        case '-':
+            sign = -1;
+            ++val;
+            break;
+        default:
+            break;
+    }
+
+    // Reject "-" and "+"
+    if (val[0] == '\0') {
         return -1;
     }
+
+    char *point = strchrnul(val, '.');
 
     // Parse integer part, then fractional part
     s64 intPart = 0;
     s64 fracPart = 0;
-    int rc = parseDecIntOptionImpl(&intPart, val, point - val, INT64_MIN, INT64_MAX);
+    int rc = 0;
+
+    if (point == val) {
+        // e.g. -.5
+        if (val[1] == '\0')
+            return -1;
+    }
+    else {
+        rc = parseDecIntOptionImpl(&intPart, val, point - val, INT64_MIN, INT64_MAX);
+    }
 
     if (rc != 0) {
         return -1;
     }
 
-    s64 sign = intPart < 0 ? -1 : 1;
     s64 intPartAbs = sign == -1 ? -intPart : intPart;
     s64 res = 0;
     bool of = __builtin_mul_overflow(intPartAbs, FLOAT_CONV_MULT, &res);
-    
+
     if (of) {
         return -1;
     }
-    
+
     s64 mul = FLOAT_CONV_MULT / 10;
 
     // Check if there's a fractional part
@@ -173,7 +199,7 @@ static int parseDecFloatOption(s64 *out, const char *val, s64 minval, s64 maxval
             if (*pos < '0' || *pos > '9') {
                 return -1;
             }
-            
+
             res += (*pos - '0') * mul;
             mul /= 10;
         }
@@ -420,19 +446,6 @@ static int configIniHandler(void* user, const char* section, const char* name, c
             } else {
                 CHECK_PARSE_OPTION(-1);
             }
-        } else if (strcmp(name, "force_audio_output") == 0) {
-            if (strcasecmp(value, "off") == 0) {
-                cfg->multiConfig |= 0 << (2 * (u32)FORCEAUDIOOUTPUT);
-                return 1;
-            } else if (strcasecmp(value, "headphones") == 0) {
-                cfg->multiConfig |= 1 << (2 * (u32)FORCEAUDIOOUTPUT);
-                return 1;
-            } else if (strcasecmp(value, "speakers") == 0) {
-                cfg->multiConfig |= 2 << (2 * (u32)FORCEAUDIOOUTPUT);
-                return 1;
-            } else {
-                CHECK_PARSE_OPTION(-1);
-            }
         } else {
             CHECK_PARSE_OPTION(-1);
         }
@@ -533,7 +546,23 @@ static int configIniHandler(void* user, const char* section, const char* name, c
                 return 1;
             }
         }
-        CHECK_PARSE_OPTION(-1);
+
+        if (strcmp(name, "force_audio_output") == 0) {
+            if (strcasecmp(value, "off") == 0) {
+                cfg->multiConfig |= 0 << (2 * (u32)FORCEAUDIOOUTPUT);
+                return 1;
+            } else if (strcasecmp(value, "headphones") == 0) {
+                cfg->multiConfig |= 1 << (2 * (u32)FORCEAUDIOOUTPUT);
+                return 1;
+            } else if (strcasecmp(value, "speakers") == 0) {
+                cfg->multiConfig |= 2 << (2 * (u32)FORCEAUDIOOUTPUT);
+                return 1;
+            } else {
+                CHECK_PARSE_OPTION(-1);
+            }
+        } else {
+            CHECK_PARSE_OPTION(-1);
+        }
     } else {
         CHECK_PARSE_OPTION(-1);
     }
@@ -621,7 +650,7 @@ static size_t saveLumaIniConfigToStr(char *out)
         1 + (int)MULTICONFIG(DEFAULTEMU), 4 - (int)MULTICONFIG(BRIGHTNESS),
         splashPosStr, (unsigned int)cfg->splashDurationMsec,
         pinNumDigits, n3dsCpuStr,
-        autobootModeStr, forceAudioOutputStr,
+        autobootModeStr,
 
         cfg->hbldr3dsxTitleId, rosalinaMenuComboStr,
         (int)cfg->ntpTzOffetMinutes,
@@ -633,6 +662,8 @@ static size_t saveLumaIniConfigToStr(char *out)
         (int)cfg->topScreenFilter.invert, (int)cfg->bottomScreenFilter.invert,
 
         cfg->autobootTwlTitleId, (int)cfg->autobootCtrAppmemtype,
+
+        forceAudioOutputStr,
 
         (int)CONFIG(PATCHUNITINFO), (int)CONFIG(DISABLEARM11EXCHANDLERS),
         (int)CONFIG(ENABLESAFEFIRMROSALINA)
@@ -786,7 +817,6 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                "PIN: Apagado( ) 4( ) 6( ) 8( ) digitos",
                                                "CPU New 3DS: Apag( ) Clock( ) L2( ) Clock+L2( )",
                                                "Autoinicio de Homebrew: Apag.( ) 3DS( ) DSi( )",
-                                               "Forzar audio: Apagado( ) Cascos( ) Altavoces( )"
                                              };
 
     static const char *singleOptionsText[] = { "( ) Autoiniciar EmuNAND",
@@ -796,7 +826,6 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                "( ) Redirigir procesos de syscore apps al core2",
                                                "( ) Mostrar NAND o texto personalizado en Conf.",
                                                "( ) Mostrar Boot de GBA en AGB_FIRM parcheado",
-                                               "( ) Forzar salida de audio a los auriculares"
                                              };
 
     static const char *optionsDescription[]  = { "Seleccionar EmuNAND por defecto.\n\n"
@@ -840,17 +869,6 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "Consulte la seccion \"autoboot\" en el\n"
                                                  "archivo de configuracion para\n"
                                                  "configurar esta caracteristica.",
-
-                                                 "Fuerza la salida de audio a los\n"
-                                                 "auriculares o altavoces.\n\n"
-                                                 "Actualmente solo para NATIVE_FIRM.\n\n"
-                                                 "Por limitaciones del software, se\n"
-                                                 "deshace cuando insertas y quitas los\n"
-												 "auriculares\n"
-                                                 "(entra y sal del modo suspension/sleep\n"
-												 "si esto pasa)\n\n"
-                                                 "Tambien se omite para el sonido del\n"
-                                                 "obturador de la camara.",
 
                                                  "Si esta habilitado, se lanzara una\n"
                                                  "EmuNAND al arrancar.\n\n"
@@ -932,7 +950,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
         { .visible = true },
         { .visible = ISN3DS },
         { .visible = true },
-        { .visible = true },
+        // { .visible = true }, audio rerouting, hidden
     };
 
     struct singleOption {
