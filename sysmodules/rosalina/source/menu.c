@@ -32,9 +32,11 @@
 #include "ifile.h"
 #include "menus.h"
 #include "utils.h"
+#include "luma_config.h"
 #include "menus/n3ds.h"
 #include "menus/cheats.h"
 #include "minisoc.h"
+#include "plugin.h"
 #include "menus/screen_filters.h"
 #include "shell.h"
 
@@ -257,6 +259,9 @@ MyThread *menuCreateThread(void)
     return &menuThread;
 }
 
+u32 menuCombo;
+u32 g_blockMenuOpen = 0;
+
 void menuThreadMain(void)
 {
     if(isN3DS)
@@ -265,7 +270,6 @@ void menuThreadMain(void)
     while (!isServiceUsable("ac:u") || !isServiceUsable("hid:USER") || !isServiceUsable("gsp::Gpu") || !isServiceUsable("cdc:CHK"))
         svcSleepThread(250 * 1000 * 1000LL);
 
-    ScreenFiltersMenu_LoadConfig();
     handleShellOpened();
 
     hidInit(); // assume this doesn't fail
@@ -279,12 +283,18 @@ void menuThreadMain(void)
 
         Cheat_ApplyCheats();
 
-        if((scanHeldKeys() & menuCombo) == menuCombo)
+        if(((scanHeldKeys() & menuCombo) == menuCombo) && !g_blockMenuOpen)
         {
             menuEnter();
             if(isN3DS) N3DSMenu_UpdateStatus();
+            PluginLoader__UpdateMenu();
             menuShow(&rosalinaMenu);
             menuLeave();
+        }
+
+        if (saveSettingsRequest) {
+            LumaConfig_SaveSettings();
+            saveSettingsRequest = false;
         }
     }
 }

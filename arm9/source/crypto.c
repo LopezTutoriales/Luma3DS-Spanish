@@ -322,7 +322,7 @@ __attribute__((aligned(4))) static u8 nandCtr[AES_BLOCK_SIZE];
 static u8 nandSlot;
 static u32 fatStart = 0;
 
-FirmwareSource firmSource = FIRMWARE_SYSNAND;
+FirmwareSource ctrNandLocation = FIRMWARE_SYSNAND;
 
 __attribute__((aligned(4))) static const u8 key1s[2][AES_BLOCK_SIZE] = {
     {0x07, 0x29, 0x44, 0x38, 0xF8, 0xC9, 0x75, 0x93, 0xAA, 0x0E, 0x4A, 0xB4, 0xAE, 0x84, 0xC1, 0xD8},
@@ -348,7 +348,7 @@ int ctrNandInit(void)
     u8 __attribute__((aligned(4))) temp[0x200];
 
     //Read NCSD header
-    result = firmSource == FIRMWARE_SYSNAND ? sdmmc_nand_readsectors(0, 1, temp) : sdmmc_sdcard_readsectors(emuOffset + emuHeader, 1, temp);
+    result = ctrNandLocation == FIRMWARE_SYSNAND ? sdmmc_nand_readsectors(0, 1, temp) : sdmmc_sdcard_readsectors(emuOffset + emuHeader, 1, temp);
 
     if(!result)
     {
@@ -375,7 +375,7 @@ int ctrNandRead(u32 sector, u32 sectorCount, u8 *outbuf)
 
     //Read
     int result;
-    if(firmSource == FIRMWARE_SYSNAND)
+    if(ctrNandLocation == FIRMWARE_SYSNAND)
         result = sdmmc_nand_readsectors(sector + fatStart, sectorCount, outbuf);
     else
     {
@@ -603,7 +603,7 @@ void kernel9Loader(Arm9Bin *arm9Section)
     aes_use_keyslot(arm9BinSlot);
     aes(startOfArm9Bin, startOfArm9Bin, arm9SectionSize / AES_BLOCK_SIZE, arm9BinCtr, AES_CTR_MODE, AES_INPUT_BE | AES_INPUT_NORMAL);
 
-    if(*startOfArm9Bin != 0x47704770 && *startOfArm9Bin != 0xB0862000) error("Error al descrifrar binario arm9.");
+    if(*startOfArm9Bin != 0x47704770 && *startOfArm9Bin != 0xB0862000) error("Error al descifrar binario de Arm9.");
 }
 
 void computePinHash(u8 *outbuf, const u8 *inbuf)

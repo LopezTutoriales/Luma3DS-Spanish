@@ -61,10 +61,10 @@ void detectAndProcessExceptionDumps(void)
     const vu8 *additionalData = stackDump + dumpHeader->stackDumpSize;
 
     static const char *handledExceptionNames[] = {
-        "FIQ", "Instruccion indefinida", "Aborto de pre-carga", "aborto de datos"
+        "FIQ", "instruccion indefinida", "aborto pre-carga", "aborto de datos"
     },
                       *specialExceptions[] = {
-        "Panico de Kernel", "svcBreak"
+        "panico de Kernel", "svcBreak"
     },
                       *registerNames[] = {
         "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10", "R11", "R12",
@@ -72,10 +72,10 @@ void detectAndProcessExceptionDumps(void)
     },
                       *faultStatusNames[] = {
         "Alineacion", "Op. mantenimiento de cache",
-        "Ext.Aborto en traduccion - Lv1", "Ext.Aborto en traduccion - Lv2",
+        "Ext.Aborto traduccion - Lv1", "Ext.Aborto traduccion - Lv2",
         "Traduccion - Seccion", "Traduccion - Pagina", "Bit de acceso - Seccion", "Bit de acceso - Pagina",
         "Dominio - Seccion", "Dominio - Pagina", "Permiso - Seccion", "Permiso - Pagina",
-        "Aborto Externo Preciso", "Aborto Externo Impreciso", "Evento de Depuracion"
+        "Aborto Externo Preciso", "Aborto Externo Impreciso", "Evento Depuracion"
     };
 
     static const u32 faultStatusValues[] = {
@@ -136,7 +136,7 @@ void detectAndProcessExceptionDumps(void)
                                     "Proceso actual:  %.8s (%016llX)", (const char *)additionalData, *(vu64 *)(additionalData + 8));
         else
             posY = drawFormattedString(true, 10, posY + SPACING_Y, COLOR_WHITE,
-                                    "Dumpeo memoria Arm en offset %X tam. %lX", (uintptr_t)additionalData - (uintptr_t)dumpHeader, size);
+                                    "Dumpeo memoria Arm9 en offset %X tam. %lX", (uintptr_t)additionalData - (uintptr_t)dumpHeader, size);
     }
     posY += SPACING_Y;
 
@@ -151,7 +151,7 @@ void detectAndProcessExceptionDumps(void)
     }
 
     if(dumpHeader->processor == 11 && dumpHeader->type == 3)
-        posY = drawFormattedString(true, 10, posY + SPACING_Y, COLOR_WHITE, "%-7s%08lX    Tipo de acceso: %s", "FAR", regs[19], regs[17] & (1u << 11) ? "Escribir" : "Leer");
+        posY = drawFormattedString(true, 10, posY + SPACING_Y, COLOR_WHITE, "%-7s%08lX    Tipo de acceso: %s", "FAR", regs[19], regs[17] & (1u << 11) ? "Escritura" : "Lectura");
 
     posY += SPACING_Y;
 
@@ -159,7 +159,7 @@ void detectAndProcessExceptionDumps(void)
     if(dumpHeader->type == 3 && (mode == 7 || mode == 11))
         posY = drawString(true, 10, posY + SPACING_Y, COLOR_YELLOW, "Dumpeo incorrecto: fallo al dumpear codigo y/o pila") + SPACING_Y;
 
-    u32 posYBottom = drawString(false, 10, 10, COLOR_WHITE, "Volcado de Pila:") + SPACING_Y;
+    u32 posYBottom = drawString(false, 10, 10, COLOR_WHITE, "Volcado de pila:") + SPACING_Y;
 
     for(u32 line = 0; line < 19 && stackDump < additionalData; line++)
     {

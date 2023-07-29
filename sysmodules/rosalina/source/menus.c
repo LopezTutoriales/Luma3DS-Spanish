@@ -35,6 +35,7 @@
 #include "menus/miscellaneous.h"
 #include "menus/sysconfig.h"
 #include "menus/screen_filters.h"
+#include "plugin.h"
 #include "ifile.h"
 #include "memory.h"
 #include "fmt.h"
@@ -48,6 +49,7 @@ Menu rosalinaMenu = {
         { "Hacer una captura de pantalla", METHOD, .method = &RosalinaMenu_TakeScreenshot },
         { "Cambiar brillo de pantalla", METHOD, .method = &RosalinaMenu_ChangeScreenBrightness },
         { "Trucos...", METHOD, .method = &RosalinaMenu_Cheats },
+        { "", METHOD, .method = PluginLoader__MenuCallback},
         { "Lista de procesos", METHOD, .method = &RosalinaMenu_ProcessList },
         { "Opciones del depurador...", MENU, .menu = &debuggerMenu },
         { "Configuracion de sistema...", MENU, .menu = &sysconfigMenu },
@@ -120,13 +122,13 @@ void RosalinaMenu_ShowDebugInfo(void)
         u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, memoryMap);
         posY = Draw_DrawFormattedString(10, posY, COLOR_WHITE, "Kernel ext PA: %08lx - %08lx\n\n", kextPa, kextPa + kextSize);
         posY = Draw_DrawFormattedString(
-            10, posY, COLOR_WHITE, "Version de Kernel: %lu.%lu-%lu\n",
+            10, posY, COLOR_WHITE, "Version Kernel: %lu.%lu-%lu\n",
             GET_VERSION_MAJOR(kernelVer), GET_VERSION_MINOR(kernelVer), GET_VERSION_REVISION(kernelVer)
         );
         if (mcuFwVersion != 0)
         {
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "Version de FW MCU: %lu.%lu\n",
+                10, posY, COLOR_WHITE, "Version FW MCU: %lu.%lu\n",
                 GET_VERSION_MAJOR(mcuFwVersion), GET_VERSION_MINOR(mcuFwVersion)
             );
         }
@@ -135,7 +137,7 @@ void RosalinaMenu_ShowDebugInfo(void)
         {
             u32 clkDiv = 1 << (1 + (speedInfo.sdClkCtrl & 0xFF));
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "Velocidad de SD: HS=%d %lukHz\n",
+                10, posY, COLOR_WHITE, "Velocidad SD: HS=%d %lukHz\n",
                 (int)speedInfo.highSpeedModeEnabled, SYSCLOCK_SDMMC / (1000 * clkDiv)
             );
         }
@@ -143,13 +145,13 @@ void RosalinaMenu_ShowDebugInfo(void)
         {
             u32 clkDiv = 1 << (1 + (speedInfo.sdClkCtrl & 0xFF));
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "Velocidad de NAND: HS=%d %lukHz\n",
+                10, posY, COLOR_WHITE, "Velocidad NAND: HS=%d %lukHz\n",
                 (int)speedInfo.highSpeedModeEnabled, SYSCLOCK_SDMMC / (1000 * clkDiv)
             );
         }
         {
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "Tipo de memoria: %lu\n",
+                10, posY, COLOR_WHITE, "Tipo memoria: %lu\n",
                 OS_KernelConfig->app_memtype
             );
         }
@@ -440,12 +442,12 @@ void RosalinaMenu_TakeScreenshot(void)
 
     dateTimeToString(dateTimeStr, osGetTime(), true);
 
-    sprintf(filename, "/luma/screenshots/%s_superior.bmp", dateTimeStr);
+    sprintf(filename, "/luma/screenshots/%s_sup.bmp", dateTimeStr);
     TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
     TRY(RosalinaMenu_WriteScreenshot(&file, topWidth, true, true));
     TRY(IFile_Close(&file));
 
-    sprintf(filename, "/luma/screenshots/%s_inferior.bmp", dateTimeStr);
+    sprintf(filename, "/luma/screenshots/%s_inf.bmp", dateTimeStr);
     TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
     TRY(RosalinaMenu_WriteScreenshot(&file, bottomWidth, false, true));
     TRY(IFile_Close(&file));

@@ -45,7 +45,6 @@ extern u8 __itcm_start__[], __itcm_lma__[], __itcm_bss_start__[], __itcm_end__[]
 
 extern CfgData configData;
 extern ConfigurationStatus needConfig;
-extern FirmwareSource firmSource;
 
 bool isSdMode;
 char launchedPathForFatfs[256];
@@ -57,14 +56,16 @@ u8 mcuConsoleInfo[9];
 
 void main(int argc, char **argv, u32 magicWord)
 {
-    bool isFirmProtEnabled,
+    bool isFirmProtEnabled = true,
          isSafeMode = false,
          needToInitSd = false,
          isNoForceFlagSet = false,
          isInvalidLoader = false,
-         isNtrBoot;
-    FirmwareType firmType;
-    FirmwareSource nandType;
+         isNtrBoot = false;
+    FirmwareType firmType = NATIVE_FIRM;
+    FirmwareSource nandType = FIRMWARE_SYSNAND;
+    u32 emunandIndex = 0;
+
     const vu8 *bootMediaStatus = (const vu8 *)0x1FFFE00C;
     const vu32 *bootPartitionsStatus = (const vu32 *)0x1FFFE010;
     u32 firmlaunchTidLow = 0;
@@ -145,18 +146,18 @@ void main(int argc, char **argv, u32 magicWord)
 
     if(memcmp(launchedPath, u"sdmc", 8) == 0)
     {
-        if(!mountFs(true, false)) error("Fallo al montar la SD.");
+        if(!mountSdCardPartition(true)) error("Fallo al montar la SD.");
         isSdMode = true;
     }
     else if(memcmp(launchedPath, u"nand", 8) == 0)
     {
-        if(!mountFs(false, true)) error("Fallo al montar la CTRNAND.");
+        if(!remountCtrNandPartition(true)) error("Fallo al montar la CTRNAND.");
         isSdMode = false;
     }
     else if(bootType == NTR || memcmp(launchedPath, u"firm", 8) == 0)
     {
-        if(mountFs(true, false)) isSdMode = true;
-        else if(mountFs(false, true)) isSdMode = false;
+        if(mountSdCardPartition(true)) isSdMode = true;
+        else if(remountCtrNandPartition(true)) isSdMode = false;
         else error("Fallo al montar la SD y la CTRNAND.");
 
         if(bootType == NTR)
@@ -202,7 +203,7 @@ void main(int argc, char **argv, u32 magicWord)
         }
 
         nandType = (FirmwareSource)BOOTCFG_NAND;
-        firmSource = (FirmwareSource)BOOTCFG_FIRM;
+        emunandIndex = BOOTCFG_EMUINDEX;
         isFirmProtEnabled = !BOOTCFG_NTRCARDBOOT;
 
         goto boot;
@@ -227,13 +228,12 @@ void main(int argc, char **argv, u32 magicWord)
         if(bootenv == 7)
         {
             nandType = FIRMWARE_SYSNAND;
-            firmSource = (BOOTCFG_NAND != 0) == (BOOTCFG_FIRM != 0) ? FIRMWARE_SYSNAND : (FirmwareSource)BOOTCFG_FIRM;
 
             // Prevent multiple boot options-forcing
             // This bit is a bit weird. Basically, as you return to Home Menu by pressing either
             // the HOME or POWER button, nandType will be overridden to "SysNAND" (needed). But,
             // if you reboot again (e.g. via Rosalina menu), it'll use your default settings.
-            if(nandType != BOOTCFG_NAND || firmSource != BOOTCFG_FIRM) isNoForceFlagSet = true;
+            if(nandType != BOOTCFG_NAND) isNoForceFlagSet = true;
 
             goto boot;
         }
@@ -247,7 +247,7 @@ void main(int argc, char **argv, u32 magicWord)
         if(validTlnc || !(pressed || BOOTCFG_NOFORCEFLAG))
         {
             nandType = (FirmwareSource)BOOTCFG_NAND;
-            firmSource = (FirmwareSource)BOOTCFG_FIRM;
+            emunandIndex = BOOTCFG_EMUINDEX;
 
             goto boot;
         }
@@ -280,7 +280,6 @@ void main(int argc, char **argv, u32 magicWord)
     if(!CFG_BOOTENV && pressed == SAFE_MODE)
     {
         nandType = FIRMWARE_SYSNAND;
-        firmSource = FIRMWARE_SYSNAND;
 
         isSafeMode = true;
         needToInitSd = true;
@@ -308,7 +307,6 @@ void main(int argc, char **argv, u32 magicWord)
     if(!CFG_BOOTENV && pressed == SAFE_MODE)
     {
         nandType = FIRMWARE_SYSNAND;
-        firmSource = FIRMWARE_SYSNAND;
 
         isSafeMode = true;
         needToInitSd = true;
@@ -322,51 +320,29 @@ void main(int argc, char **argv, u32 magicWord)
 
     //If booting from CTRNAND, always use SysNAND
     if(!isSdMode) nandType = FIRMWARE_SYSNAND;
-
-    //If R is pressed, boot the non-updated NAND with the FIRM of the opposite one
-    else if(pressed & BUTTON_R1)
-    {
-        if(CONFIG(USEEMUFIRM))
-        {
-            nandType = FIRMWARE_SYSNAND;
-            firmSource = FIRMWARE_EMUNAND;
-        }
-        else
-        {
-            nandType = FIRMWARE_EMUNAND;
-            firmSource = FIRMWARE_SYSNAND;
-        }
-    }
-
-    /* Else, boot the NAND the user set to autoboot or the opposite one, depending on L,
-       with their own FIRM */
-    else firmSource = nandType = (autoBootEmu == ((pressed & BUTTON_L1) == BUTTON_L1)) ? FIRMWARE_SYSNAND : FIRMWARE_EMUNAND;
+    else nandType = (autoBootEmu == ((pressed & BUTTON_L1) == BUTTON_L1)) ? FIRMWARE_SYSNAND : FIRMWARE_EMUNAND;
 
     //If we're booting EmuNAND or using EmuNAND FIRM, determine which one from the directional pad buttons, or otherwise from the config
-    if(nandType == FIRMWARE_EMUNAND || firmSource == FIRMWARE_EMUNAND)
+    if(nandType == FIRMWARE_EMUNAND)
     {
-        FirmwareSource tempNand;
         switch(pressed & DPAD_BUTTONS)
         {
             case BUTTON_UP:
-                tempNand = FIRMWARE_EMUNAND;
+                emunandIndex = 0;
                 break;
             case BUTTON_RIGHT:
-                tempNand = FIRMWARE_EMUNAND2;
+                emunandIndex = 1;
                 break;
             case BUTTON_DOWN:
-                tempNand = FIRMWARE_EMUNAND3;
+                emunandIndex = 2;
                 break;
             case BUTTON_LEFT:
-                tempNand = FIRMWARE_EMUNAND4;
+                emunandIndex = 3;
                 break;
             default:
-                tempNand = (FirmwareSource)(1 + MULTICONFIG(DEFAULTEMU));
+                emunandIndex = MULTICONFIG(DEFAULTEMU);
                 break;
         }
-
-        if(nandType == FIRMWARE_EMUNAND) nandType = tempNand;
-        else firmSource = tempNand;
     }
 
 boot:
@@ -374,24 +350,21 @@ boot:
     //If we need to boot EmuNAND, make sure it exists
     if(nandType != FIRMWARE_SYSNAND)
     {
-        locateEmuNand(&nandType);
-        if(nandType == FIRMWARE_SYSNAND) firmSource = FIRMWARE_SYSNAND;
-        else if((*(vu16 *)(SDMMC_BASE + REG_SDSTATUS0) & TMIO_STAT0_WRPROTECT) == 0) //Make sure the SD card isn't write protected
+        locateEmuNand(&nandType, &emunandIndex, true);
+        if(nandType == FIRMWARE_EMUNAND && (*(vu16 *)(SDMMC_BASE + REG_SDSTATUS0) & TMIO_STAT0_WRPROTECT) == 0) //Make sure the SD card isn't write protected
             error("La SD esta bloqueada, EmuNAND no se puede usar.\nApague el interruptor de protec. contra escrit.");
     }
 
-    //Same if we're using EmuNAND as the FIRM source
-    else if(firmSource != FIRMWARE_SYSNAND)
-        locateEmuNand(&firmSource);
+    ctrNandLocation = nandType; // for CTRNAND partition
 
     if(bootType != FIRMLAUNCH)
     {
-        configData.bootConfig = ((bootType == NTR ? 1 : 0) << 7) | ((u32)isNoForceFlagSet << 6) | ((u32)firmSource << 3) | (u32)nandType;
+        configData.bootConfig = ((bootType == NTR ? 1 : 0) << 4) | ((u32)isNoForceFlagSet << 3) | ((u32)emunandIndex << 1) | (u32)nandType;
         writeConfig(false);
     }
 
     bool loadFromStorage = CONFIG(LOADEXTFIRMSANDMODULES);
-    u32 firmVersion = loadNintendoFirm(&firmType, firmSource, loadFromStorage, isSafeMode);
+    u32 firmVersion = loadNintendoFirm(&firmType, nandType, loadFromStorage, isSafeMode);
 
     bool doUnitinfoPatch = CONFIG(PATCHUNITINFO);
     u32 res = 0;
@@ -417,6 +390,7 @@ boot:
 
     if(res != 0) error("Fallo al aplicar %u parche(s) al FIRM.", res);
 
+    unmountPartitions();
     if(bootType != FIRMLAUNCH) deinitScreens();
     launchFirm(0, NULL);
 }

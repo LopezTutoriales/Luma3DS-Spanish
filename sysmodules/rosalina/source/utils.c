@@ -57,7 +57,7 @@ void formatUserMemoryState(char *outbuf, MemState state)
         "Privado",
         "Compartido",
         "Continuo",
-        "Alias",
+        "Aliado",
         "Alias",
         "CodAlias",
         "Bloqueado"

@@ -497,7 +497,7 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
             static const char *processExitReplies[] = { "W00", "X0f", "X0f" };
             char pidbuf[32];
             if (ctx->multiprocessExtEnabled && ctx->state == GDB_STATE_ATTACHED)
-                sprintf(pidbuf, ";process:%lx", GDB_ConvertFromRealPid(ctx->pid));
+                sprintf(pidbuf, ";proceso:%lx", GDB_ConvertFromRealPid(ctx->pid));
             else
                 pidbuf[0] = '\0';
             return GDB_SendFormattedPacket(ctx, "%s%s", processExitReplies[(u32)info->exit_process.reason], pidbuf);
@@ -560,10 +560,10 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
                             const char *kinds[] = { "", "r", "", "a" };
                             WatchpointKind kind = GDB_GetWatchpointKind(ctx, exc.stop_point.fault_information);
                             if(kind == WATCHPOINT_DISABLED)
-                                GDB_SendDebugString(ctx, "Advertencia: watchpoint desconocido encontrado!\n");
+                                GDB_SendDebugString(ctx, "Adv: watchpoint desconocido encontrado!\n");
 
                             GDB_ParseCommonThreadInfo(buffer, ctx, SIGTRAP);
-                            return GDB_SendFormattedPacket(ctx, "%s%smuestra:%08lx;", buffer, kinds[(u32)kind], exc.stop_point.fault_information);
+                            return GDB_SendFormattedPacket(ctx, "%s%swatch:%08lx;", buffer, kinds[(u32)kind], exc.stop_point.fault_information);
                         }
 
                         default:

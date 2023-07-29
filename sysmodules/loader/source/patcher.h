@@ -12,10 +12,10 @@
 #define MULTICONFIG(a)   ((multiConfig >> (2 * (a))) & 3)
 #define BOOTCONFIG(a, b) ((bootConfig >> (a)) & (b))
 
-#define BOOTCFG_NAND         BOOTCONFIG(0, 7)
-#define BOOTCFG_FIRM         BOOTCONFIG(3, 7)
-#define BOOTCFG_NOFORCEFLAG  BOOTCONFIG(6, 1)
-#define BOOTCFG_NTRCARDBOOT  BOOTCONFIG(7, 1)
+#define BOOTCFG_NAND         BOOTCONFIG(0, 1)
+#define BOOTCFG_EMUINDEX     BOOTCONFIG(1, 3)
+#define BOOTCFG_NOFORCEFLAG  BOOTCONFIG(3, 1)
+#define BOOTCFG_NTRCARDBOOT  BOOTCONFIG(4, 1)
 
 enum multiOptions
 {
@@ -31,19 +31,20 @@ enum multiOptions
 enum singleOptions
 {
     AUTOBOOTEMU = 0,
-    USEEMUFIRM,
     LOADEXTFIRMSANDMODULES,
     PATCHGAMES,
     REDIRECTAPPTHREADS,
     PATCHVERSTRING,
     SHOWGBABOOT,
+    ENABLEDSIEXTFILTER,
+    ALLOWUPDOWNLEFTRIGHTDSI,
     PATCHUNITINFO,
     DISABLEARM11EXCHANDLERS,
     ENABLESAFEFIRMROSALINA,
 };
 
 extern u32 config, multiConfig, bootConfig;
-extern bool isN3DS, isSdMode;
+extern bool isN3DS, isSdMode, nextGamePatchDisabled;
 
 void patchCode(u64 progId, u16 progVer, u8 *code, u32 size, u32 textSize, u32 roSize, u32 dataSize, u32 roAddress, u32 dataAddress);
 bool loadTitleCodeSection(u64 progId, u8 *code, u32 size);

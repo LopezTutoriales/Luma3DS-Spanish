@@ -36,6 +36,7 @@
 #include "minisoc.h"
 #include "ifile.h"
 #include "pmdbgext.h"
+#include "plugin.h"
 #include "process_patches.h"
 
 typedef struct DspFirmSegmentHeader {
@@ -104,7 +105,7 @@ void MiscellaneousMenu_SwitchBoot3dsxTargetTitle(void)
         else
         {
             res = -1;
-            strcpy(failureReason, "No se encontro un proceso\nadecuado");
+            strcpy(failureReason, "proceso adecuado no encontrado");
         }
     }
     else
@@ -126,7 +127,7 @@ void MiscellaneousMenu_SwitchBoot3dsxTargetTitle(void)
         Luma_SharedConfig->hbldr_3dsx_tid = newTid;
 
     if (compareTids(newTid, HBLDR_DEFAULT_3DSX_TID))
-        miscellaneousMenu.items[0].title = "Cambiar Homebrew Launcher por esta app.";
+        miscellaneousMenu.items[0].title = "Cambiar Homebrew Launcher por esta app";
     else
         miscellaneousMenu.items[0].title = "Cambiar HBL. por " HBLDR_DEFAULT_3DSX_TITLE_NAME;
 
@@ -481,7 +482,7 @@ void MiscellaneousMenu_DumpDspFirm(void)
         else
             Draw_DrawFormattedString(
                 10, 30, COLOR_WHITE,
-                "Operacion fallida (0x%08lx).\n\nAsegurate de que el menu Home esta funcionando y\nque tu SD esta insertada.",
+                "Operacion fallida (0x%08lx).\n\nAsegurate de que el menu Home esta funcionando\ny que tu SD esta insertada.",
                 res
             );
         Draw_FlushFramebuffer();

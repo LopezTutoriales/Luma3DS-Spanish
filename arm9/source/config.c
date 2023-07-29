@@ -52,19 +52,20 @@ ConfigurationStatus needConfig;
 static CfgData oldConfig;
 
 static CfgDataMcu configDataMcu;
-static_assert(sizeof(CfgDataMcu) > 0, "Tam. de datos incorrecto");
+static_assert(sizeof(CfgDataMcu) > 0, "tam. de datos incorrecto");
 
 // INI parsing
 // ===========================================================
 
 static const char *singleOptionIniNamesBoot[] = {
     "autoboot_emunand",
-    "use_emunand_firm_if_r_pressed",
     "enable_external_firm_and_modules",
     "enable_game_patching",
     "app_syscore_threads_on_core_2",
     "show_system_settings_string",
     "show_gba_boot_screen",
+    "enable_dsi_external_filter",
+    "allow_updown_leftright_dsi",
 };
 
 static const char *singleOptionIniNamesMisc[] = {
@@ -78,7 +79,7 @@ static const char *keyNames[] = {
     "?", "?",
     "ZL", "ZR",
     "?", "?", "?", "?",
-    "Touch",
+    "Tactil",
     "?", "?", "?",
     "CStick Derecha", "CStick Izquierda", "CStick Arriba", "CStick Abajo",
     "CPad Derecha", "CPad Izquierda", "CPad Arriba", "CPad Abajo",
@@ -461,6 +462,11 @@ static int configIniHandler(void* user, const char* section, const char* name, c
             CHECK_PARSE_OPTION(parseKeyComboOption(&opt, value));
             cfg->rosalinaMenuCombo = opt;
             return 1;
+        } else if (strcmp(name, "plugin_loader_enabled") == 0) {
+            bool opt;
+            CHECK_PARSE_OPTION(parseBoolOption(&opt, value));
+            cfg->pluginLoaderFlags = opt ? cfg->pluginLoaderFlags | 1 : cfg->pluginLoaderFlags & ~1;
+            return 1;
         } else if (strcmp(name, "ntp_tz_offset_min") == 0) {
             s64 opt;
             CHECK_PARSE_OPTION(parseDecIntOption(&opt, value, -779, 899));
@@ -642,17 +648,17 @@ static size_t saveLumaIniConfigToStr(char *out)
         lumaVerStr, lumaRevSuffixStr,
 
         (int)CONFIG_VERSIONMAJOR, (int)CONFIG_VERSIONMINOR,
-        (int)CONFIG(AUTOBOOTEMU), (int)CONFIG(USEEMUFIRM),
-        (int)CONFIG(LOADEXTFIRMSANDMODULES), (int)CONFIG(PATCHGAMES),
-        (int)CONFIG(REDIRECTAPPTHREADS), (int)CONFIG(PATCHVERSTRING),
-        (int)CONFIG(SHOWGBABOOT),
+        (int)CONFIG(AUTOBOOTEMU), (int)CONFIG(LOADEXTFIRMSANDMODULES),
+        (int)CONFIG(PATCHGAMES), (int)CONFIG(REDIRECTAPPTHREADS),
+        (int)CONFIG(PATCHVERSTRING), (int)CONFIG(SHOWGBABOOT),
+        (int)CONFIG(ENABLEDSIEXTFILTER), (int)CONFIG(ALLOWUPDOWNLEFTRIGHTDSI),
 
         1 + (int)MULTICONFIG(DEFAULTEMU), 4 - (int)MULTICONFIG(BRIGHTNESS),
         splashPosStr, (unsigned int)cfg->splashDurationMsec,
         pinNumDigits, n3dsCpuStr,
         autobootModeStr,
 
-        cfg->hbldr3dsxTitleId, rosalinaMenuComboStr,
+        cfg->hbldr3dsxTitleId, rosalinaMenuComboStr, (int)(cfg->pluginLoaderFlags & 1),
         (int)cfg->ntpTzOffetMinutes,
 
         (int)cfg->topScreenFilter.cct, (int)cfg->bottomScreenFilter.cct,
@@ -806,7 +812,7 @@ void writeConfig(bool isConfigOptions)
         writeConfigMcu();
 
     if(updateIni && !writeLumaIniConfig())
-        error("Error escribiendo arch. de config.");
+        error("Error al escribir archivo de config.");
 }
 
 void configMenu(bool oldPinStatus, u32 oldPinMode)
@@ -820,12 +826,16 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                              };
 
     static const char *singleOptionsText[] = { "( ) Autoiniciar EmuNAND",
-                                               "( ) Usar FIRM EmuNAND si enciendes con R",
                                                "( ) Habilitar cargar modulos y FIRMs externos",
                                                "( ) Habilitar parcheo de juegos",
                                                "( ) Redirigir procesos de syscore apps al core2",
                                                "( ) Mostrar NAND o texto personalizado en Conf.",
                                                "( ) Mostrar Boot de GBA en AGB_FIRM parcheado",
+                                               "( ) Usar filtros de mejora personal. para DSi",
+                                               "( ) Permitir combos Izq+Der / Arr+Aba para DSi",
+
+                                               // Should always be the last entry
+                                               "\nGuardar y salir"
                                              };
 
     static const char *optionsDescription[]  = { "Seleccionar EmuNAND por defecto.\n\n"
@@ -862,8 +872,8 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "La opcion 'Clock+L2' puede causar\n"
                                                  "problemas en algunos juegos.",
 
-                                                 "Habilitar autoinicio de homebrew,\n"
-                                                 "ya sea en modo 3DS o DSi.\n\n"
+                                                 "Habilitar autoinicio de Homebrew\n"
+                                                 "Launcher, ya sea en modo 3DS o DSi.\n\n"
                                                  "Autoiniciar un titulo de un cartucho\n"
                                                  "de juego no esta soportado.\n\n"
                                                  "Consulte la seccion \"autoboot\" en el\n"
@@ -879,20 +889,8 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "(Arriba/Derecha/Abajo/Izquierda es\n"
                                                  "igual a las EmuNANDS 1/2/3/4).",
 
-                                                 "Si esta habilitado, cuando mantengas\n"
-                                                 "R en el arranque, arrancara la SysNAND\n"
-                                                 "con un FIRM EmuNAND.\n\n"
-                                                 "En caso contrario, se lanzara una\n"
-                                                 "EmuNAND con un FIRM SysNAND.\n\n"
-                                                 "Para usar una EmuNAND diferente de la\n"
-                                                 "predeterminada, manten la cruceta\n"
-                                                 "Arriba/Derecha/Abajo/Izquierda es\n"
-                                                 "igual a las EmuNANDS 1/2/3/4), agrega\n"
-                                                 "el boton A si quieres lanzar un\n"
-												 "payload.",
-
-                                                 "Habilita la carga de FIRMs y modulos\n"
-                                                 "de sistema externos.\n\n"
+                                                 "Habilita la carga de FIRMs externos y\n"
+                                                 "modulos de sistema.\n\n"
                                                  "Esto no es necesario en la mayoria de\n"
                                                  "los casos.\n\n"
 												 "(Consultar la wiki para instrucciones)",
@@ -907,11 +905,11 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "(Consultar la wiki para instrucciones)",
 
                                                  "Redirige subprocesos de las app que se\n"
-                                                 "generan en el core1 al core 2 (que es\n"
+                                                 "generan en el core1 al core2 (que es\n"
                                                  "un nucleo de CPU adicional para apps\n"
-                                                 "que normalmente no se utilizan).\n\n"
+                                                 "que normalmente no se utiliza).\n\n"
                                                  "Esto mejora el rendimiento en juegos\n"
-                                                 "muy exigentes (como Pokemon US/UL)\n" // CP437
+                                                 "muy exigentes (como Pokemon US/UL)\n"
                                                  "alrededor de un 10%. Puede romper\n"
                                                  "algunos juegos y otras aplicaciones.\n",
 
@@ -919,23 +917,40 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "\t* Sys  = SysNAND\n"
                                                  "\t* Emu  = EmuNAND 1\n"
                                                  "\t* EmuX = EmuNAND X\n"
-                                                 "\t* SysE = SysNAND con EmuNAND 1 FIRM\n"
-                                                 "\t* SyEX = SysNAND con EmuNAND X FIRM\n"
-                                                 "\t* EmuS = EmuNAND 1 con SysNAND FIRM\n"
-                                                 "\t* EmXS = EmuNAND X con SysNAND FIRM\n\n"
                                                  "o un texto personalizado por el\n"
                                                  "usuario en la Configuracion de Sistema\n\n"
                                                  "(Consultar la wiki para instrucciones)",
 
                                                  "Muestra la pantalla de arranque de GBA\n"
                                                  "cuando se lanzan juegos de GBA.",
+
+                                                 "Habilita reemplazar el filtro de\n"
+                                                 "escalado por defecto usado por el\n"
+                                                 "software de DS(i) por el contenido en:\n\n"
+                                                 "/luma/twl_upscaling_filter.bin\n\n"
+                                                 "(Consultar la wiki para detalles)",
+
+                                                 "Permite combos de Izquierda+Derecha y\n"
+                                                 "Arriba+Abajo (usando la cruceta y el\n"
+                                                 "Circle PAD simultaneamente) en el\n"
+												 "software de DS(i).\n\n"
+                                                 "El software comercial filtra estos\n"
+                                                 "combos por su cuenta.",
+                                                
+                                                 // Should always be the last entry
+                                                 "Guarde los cambios y salga de este\n"
+                                                 "menu. Para descartar los cambios pulse\n"
+                                                 "el boton POWER. Usa START como acceso\n"
+												 "directo a esta opcion para guardar.",
                                                };
 
     FirmwareSource nandType = FIRMWARE_SYSNAND;
     if(isSdMode)
     {
+        // Check if there is at least one emuNAND
+        u32 emuIndex = 0;
         nandType = FIRMWARE_EMUNAND;
-        locateEmuNand(&nandType);
+        locateEmuNand(&nandType, &emuIndex, false);
     }
 
     struct multiOption {
@@ -959,10 +974,12 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
         bool visible;
     } singleOptions[] = {
         { .visible = nandType == FIRMWARE_EMUNAND },
-        { .visible = nandType == FIRMWARE_EMUNAND },
         { .visible = true },
         { .visible = true },
         { .visible = ISN3DS },
+        { .visible = true },
+        { .visible = true },
+        { .visible = true },
         { .visible = true },
         { .visible = true },
     };
@@ -1026,7 +1043,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
 
         singleOptions[i].posY = endPos + SPACING_Y;
         endPos = drawString(true, 10, singleOptions[i].posY, color, singleOptionsText[i]);
-        if(singleOptions[i].enabled) drawCharacter(true, 10 + SPACING_X, singleOptions[i].posY, color, selected);
+        if(singleOptions[i].enabled && singleOptionsText[i][0] == '(') drawCharacter(true, 10 + SPACING_X, singleOptions[i].posY, color, selected);
 
         if(color == COLOR_RED)
         {
@@ -1037,18 +1054,25 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
     }
 
     drawString(false, 10, 10, COLOR_WHITE, optionsDescription[selectedOption]);
-
+    
+    bool startPressed = false;
     //Boring configuration menu
     while(true)
     {
-        u32 pressed;
+        u32 pressed = 0;
+        if (!startPressed) 
         do
         {
             pressed = waitInput(true) & MENU_BUTTONS;
         }
         while(!pressed);
 
-        if(pressed & BUTTON_START) break;
+        // Force the selection of "save and exit" and trigger it.
+        if(pressed & BUTTON_START) 
+        {
+            startPressed = true;
+            pressed = BUTTON_RIGHT;
+        }
 
         if(pressed & DPAD_BUTTONS)
         {
@@ -1095,7 +1119,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                 }
             }
 
-            if(selectedOption == oldSelectedOption) continue;
+            if(selectedOption == oldSelectedOption && !startPressed) continue;
 
             //The user moved to a different option, print the old option in white and the new one in red. Only print 'x's if necessary
             if(oldSelectedOption < multiOptionsAmount)
@@ -1116,7 +1140,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
             drawString(false, 10, 10, COLOR_BLACK, optionsDescription[oldSelectedOption]);
             drawString(false, 10, 10, COLOR_WHITE, optionsDescription[selectedOption]);
         }
-        else if (pressed & BUTTON_A)
+        else if (pressed & BUTTON_A || startPressed)
         {
             //The selected option's status changed, print the 'x's accordingly
             if(isMultiOption)
@@ -1129,15 +1153,25 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
             }
             else
             {
-                bool oldEnabled = singleOptions[singleSelected].enabled;
-                singleOptions[singleSelected].enabled = !oldEnabled;
-                if(oldEnabled) drawCharacter(true, 10 + SPACING_X, singleOptions[singleSelected].posY, COLOR_BLACK, selected);
+                // Save and exit was selected.
+                if (singleSelected == singleOptionsAmount - 1)
+                {
+                    drawString(true, 10, singleOptions[singleSelected].posY, COLOR_GREEN, singleOptionsText[singleSelected]);
+                    startPressed = false;
+                    break;
+                }
+                else
+                {
+                    bool oldEnabled = singleOptions[singleSelected].enabled;
+                    singleOptions[singleSelected].enabled = !oldEnabled;
+                    if(oldEnabled) drawCharacter(true, 10 + SPACING_X, singleOptions[singleSelected].posY, COLOR_BLACK, selected);
+                }
             }
         }
 
         //In any case, if the current option is enabled (or a multiple choice option is selected) we must display a red 'x'
         if(isMultiOption) drawCharacter(true, 10 + multiOptions[selectedOption].posXs[multiOptions[selectedOption].enabled] * SPACING_X, multiOptions[selectedOption].posY, COLOR_RED, selected);
-        else if(singleOptions[singleSelected].enabled) drawCharacter(true, 10 + SPACING_X, singleOptions[singleSelected].posY, COLOR_RED, selected);
+        else if(singleOptions[singleSelected].enabled && singleOptionsText[singleSelected][0] == '(') drawCharacter(true, 10 + SPACING_X, singleOptions[singleSelected].posY, COLOR_RED, selected);
     }
 
     //Parse and write the new configuration

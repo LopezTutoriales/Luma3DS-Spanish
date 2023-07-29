@@ -32,6 +32,7 @@
 #include "config_template_ini.h"
 #include "ifile.h"
 #include "menus/miscellaneous.h"
+#include "plugin/plgloader.h"
 
 typedef struct CfgData {
     u16 formatVersionMajor, formatVersionMinor;
@@ -41,6 +42,7 @@ typedef struct CfgData {
 
     u64 hbldr3dsxTitleId;
     u32 rosalinaMenuCombo;
+    u32 pluginLoaderFlags;
     s16 ntpTzOffetMinutes;
 
     ScreenFilter topScreenFilter;
@@ -50,6 +52,8 @@ typedef struct CfgData {
     u8 autobootCtrAppmemtype;
 } CfgData;
 
+bool saveSettingsRequest = false;
+
 void LumaConfig_ConvertComboToString(char *out, u32 combo)
 {
     static const char *keys[] = {
@@ -57,7 +61,7 @@ void LumaConfig_ConvertComboToString(char *out, u32 combo)
         "?", "?",
         "ZL", "ZR",
         "?", "?", "?", "?",
-        "Touch",
+        "Tactil",
         "?", "?", "?",
         "CStick Derecha", "CStick Izquierda", "CStick Arriba", "CStick Abajo",
         "CPad Derecha", "CPad Izquierda", "CPad Arriba", "CPad Abajo",
@@ -161,17 +165,17 @@ static size_t LumaConfig_SaveLumaIniConfigToStr(char *out, const CfgData *cfg)
         lumaVerStr, lumaRevSuffixStr,
 
         (int)cfg->formatVersionMajor, (int)cfg->formatVersionMinor,
-        (int)CONFIG(AUTOBOOTEMU), (int)CONFIG(USEEMUFIRM),
-        (int)CONFIG(LOADEXTFIRMSANDMODULES), (int)CONFIG(PATCHGAMES),
-        (int)CONFIG(REDIRECTAPPTHREADS), (int)CONFIG(PATCHVERSTRING),
-        (int)CONFIG(SHOWGBABOOT),
+        (int)CONFIG(AUTOBOOTEMU), (int)CONFIG(LOADEXTFIRMSANDMODULES),
+        (int)CONFIG(PATCHGAMES), (int)CONFIG(REDIRECTAPPTHREADS),
+        (int)CONFIG(PATCHVERSTRING), (int)CONFIG(SHOWGBABOOT),
+        (int)CONFIG(ENABLEDSIEXTFILTER), (int)CONFIG(ALLOWUPDOWNLEFTRIGHTDSI),
 
         1 + (int)MULTICONFIG(DEFAULTEMU), 4 - (int)MULTICONFIG(BRIGHTNESS),
         splashPosStr, (unsigned int)cfg->splashDurationMsec,
         pinNumDigits, n3dsCpuStr,
         autobootModeStr,
 
-        cfg->hbldr3dsxTitleId, rosalinaMenuComboStr,
+        cfg->hbldr3dsxTitleId, rosalinaMenuComboStr, (int)(cfg->pluginLoaderFlags & 1),
         (int)cfg->ntpTzOffetMinutes,
 
         (int)cfg->topScreenFilter.cct, (int)cfg->bottomScreenFilter.cct,
@@ -189,6 +193,10 @@ static size_t LumaConfig_SaveLumaIniConfigToStr(char *out, const CfgData *cfg)
     );
 
     return n < 0 ? 0 : (size_t)n;
+}
+
+void LumaConfig_RequestSaveSettings(void) {
+    saveSettingsRequest = true;
 }
 
 Result LumaConfig_SaveSettings(void)
@@ -239,6 +247,7 @@ Result LumaConfig_SaveSettings(void)
     configData.splashDurationMsec = splashDurationMsec;
     configData.hbldr3dsxTitleId = Luma_SharedConfig->selected_hbldr_3dsx_tid;
     configData.rosalinaMenuCombo = menuCombo;
+    configData.pluginLoaderFlags = PluginLoader__IsEnabled();
     configData.ntpTzOffetMinutes = (s16)lastNtpTzOffset;
     configData.topScreenFilter = topScreenFilter;
     configData.bottomScreenFilter = bottomScreenFilter;

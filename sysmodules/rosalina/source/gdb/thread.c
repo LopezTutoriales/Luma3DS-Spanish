@@ -107,7 +107,7 @@ int GDB_EncodeThreadId(GDBContext *ctx, char *outbuf, u32 tid)
         return sprintf(outbuf, "%lx", tid);
 }
 
-static s32 GDB_GetDynamicThreadPriority(GDBContext *ctx, u32 threadId)
+s32 GDB_GetDynamicThreadPriority(GDBContext *ctx, u32 threadId)
 {
     Handle process, thread;
     Result r;
@@ -359,19 +359,19 @@ GDB_DECLARE_QUERY_HANDLER(ThreadExtraInfo)
     }
 
     r = svcGetDebugThreadParam(&dummy, &val, ctx->debug, id, DBGTHREAD_PARAMETER_SCHEDULING_MASK_LOW);
-    sStatus = R_SUCCEEDED(r) ? (val == 1 ? ", ejecutandose, " : ", idle, ") : "";
+    sStatus = R_SUCCEEDED(r) ? (val == 1 ? ", ejecutandose, " : ", inactivo, ") : "";
 
     val = (u32)GDB_GetDynamicThreadPriority(ctx, id);
     if(val == 65)
         sThreadDynamicPriority[0] = 0;
     else
-        sprintf(sThreadDynamicPriority, "Prio. dinamica: %ld, ", (s32)val);
+        sprintf(sThreadDynamicPriority, "prio dinamica: %ld, ", (s32)val);
 
     r = svcGetDebugThreadParam(&dummy, &val, ctx->debug, id, DBGTHREAD_PARAMETER_PRIORITY);
     if(R_FAILED(r))
         sThreadStaticPriority[0] = 0;
     else
-        sprintf(sThreadStaticPriority, "Prio. estatica: %ld, ", (s32)val);
+        sprintf(sThreadStaticPriority, "prio. statica: %ld, ", (s32)val);
 
     r = svcGetDebugThreadParam(&dummy, &val, ctx->debug, id, DBGTHREAD_PARAMETER_CPU_IDEAL);
     if(R_FAILED(r))

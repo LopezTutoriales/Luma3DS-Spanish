@@ -34,12 +34,6 @@
 
 extern Handle preTerminationEvent;
 
-static inline void assertSuccess(Result res)
-{
-    if(R_FAILED(res))
-        svcBreak(USERBREAK_PANIC);
-}
-
 static MyThread errDispThread;
 static u8 ALIGN(8) errDispThreadStack[0xD00];
 
@@ -147,11 +141,11 @@ static int ERRF_FormatRegisterDump(char *out, const ERRF_ExceptionData *exceptio
 static int ERRF_FormatGenericInfo(char *out, const ERRF_FatalErrInfo *info)
 {
     static const char *types[] = {
-        "generico", "corrupto", "SD quitada", "excepcion", "resultado fallido", "generico (solo log)", "no valido"
+        "generico", "corrupto", "SD quitada", "excepcion", "resultado fallido", "generico (solo log)", "invalido"
     };
 
     static const char *exceptionTypes[] = {
-        "aborto de precarga", "aborto de datos", "instruccion no definida", "VFP", "no valido"
+        "aborto de precarga", "aborto de datos", "instruccion indefinida", "VFP", "invalido"
     };
 
     const char *type = (u32)info->type > (u32)ERRF_ERRTYPE_LOG_ONLY ? types[6] : types[(u32)info->type];
@@ -170,7 +164,7 @@ static int ERRF_FormatGenericInfo(char *out, const ERRF_FatalErrInfo *info)
     else
         out += sprintf(out, "Tipo de error:    %s\n", type);
 
-    out += sprintf(out, "\nProcess ID:       %lu\n", info->procId);
+    out += sprintf(out, "\nID del Proceso:   %lu\n", info->procId);
 
     res = svcOpenProcess(&processHandle, info->procId);
     if(R_SUCCEEDED(res))
@@ -181,7 +175,7 @@ static int ERRF_FormatGenericInfo(char *out, const ERRF_FatalErrInfo *info)
         svcGetProcessInfo((s64 *)&titleId, processHandle, 0x10001);
         svcCloseHandle(processHandle);
         out += sprintf(out, "Nombre proceso:   %s\n", name);
-        out += sprintf(out, "ID del proceso: 0x%016llx\n", titleId);
+        out += sprintf(out, "ID del proceso:   %016llx\n", titleId);
     }
 
     out += sprintf(out, "\n");
@@ -232,7 +226,7 @@ static int ERRF_FormatError(char *out, const ERRF_FatalErrInfo *info, bool isLog
             out += sprintf(out, "Motivo:           %.96s\n", info->data.failure_mesg);
             break;
         default:
-            out += sprintf(out, "Invalid fatal error data.\n");
+            out += sprintf(out, "Error fatal de datos invalidos.\n");
     }
 
     // We might not always have enough space to display this on screen, so keep it to the log file

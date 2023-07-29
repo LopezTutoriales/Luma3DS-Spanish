@@ -77,6 +77,7 @@ typedef struct CfgData {
 
     u64 hbldr3dsxTitleId;
     u32 rosalinaMenuCombo;
+    u32 pluginLoaderFlags;
     s16 ntpTzOffetMinutes;
 
     ScreenFiltersCfgData topScreenFilter;
@@ -122,9 +123,6 @@ typedef enum FirmwareSource
 {
     FIRMWARE_SYSNAND = 0,
     FIRMWARE_EMUNAND,
-    FIRMWARE_EMUNAND2,
-    FIRMWARE_EMUNAND3,
-    FIRMWARE_EMUNAND4
 } FirmwareSource;
 
 typedef enum FirmwareType

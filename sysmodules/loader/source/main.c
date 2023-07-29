@@ -10,7 +10,7 @@
 #include "hbldr.h"
 
 u32 config, multiConfig, bootConfig;
-bool isN3DS, isSdMode;
+bool isN3DS, isSdMode, nextGamePatchDisabled;
 
 // MAKE SURE fsreg has been init before calling this
 static Result fsldrPatchPermissions(void)
@@ -115,7 +115,7 @@ void initSystem(void)
 }
 
 static const ServiceManagerServiceEntry services[] = {
-    { "Loader", 1, loaderHandleCommands, false },
+    { "Loader", 2, loaderHandleCommands, false },
     { "hb:ldr", 2, hbldrHandleCommands,  true  },
     { NULL },
 };
@@ -125,10 +125,12 @@ static const ServiceManagerNotificationEntry notifications[] = {
 };
 
 static u8 ALIGN(4) staticBufferForHbldr[0x400];
-static_assert(ARGVBUF_SIZE > 2 * PATH_MAX, "Wrong 3DSX argv buffer size");
+static_assert(ARGVBUF_SIZE > 2 * PATH_MAX, "Tam. buffer 3DSX argv malo");
 
 int main(void)
 {
+    nextGamePatchDisabled = false;
+
     // Loader doesn't use any input static buffer, so we should be fine
     u32 *sbuf = getThreadStaticBuffers();
     sbuf[0] = IPC_Desc_StaticBuffer(sizeof(staticBufferForHbldr), 0);

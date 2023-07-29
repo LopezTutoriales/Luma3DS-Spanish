@@ -151,10 +151,10 @@ static inline u32 loadFirmFromStorage(FirmwareType firmType)
 
 u32 loadNintendoFirm(FirmwareType *firmType, FirmwareSource nandType, bool loadFromStorage, bool isSafeMode)
 {
-    u32 firmVersion,
+    u32 firmVersion = 0xFFFFFFFF,
         firmSize;
 
-    bool ctrNandError = isSdMode && !mountFs(false, false);
+    bool ctrNandError = isSdMode && !remountCtrNandPartition(false);
 
     if(!ctrNandError)
     {
@@ -181,7 +181,7 @@ u32 loadNintendoFirm(FirmwareType *firmType, FirmwareSource nandType, bool loadF
             loadedFromStorage = true;
             firmSize = result;
         }
-        else if(ctrNandError) error("Imposible montar CTRNAND o cargar FIRM CTRNAND.\nUtilice uno externo.");
+        else if(ctrNandError) error("Imposible montar CTRNAND o cargar FIRM CTRNAND.\nUtilice uno externo por favor.");
     }
 
     //Check that the FIRM is right for the console from the Arm9 section address
@@ -228,6 +228,8 @@ u32 loadNintendoFirm(FirmwareType *firmType, FirmwareSource nandType, bool loadF
                 case 2:
                     firmVersion = 0x1F;
                     break;
+                default:
+                    break;
             }
         }
     }
@@ -262,10 +264,147 @@ void loadHomebrewFirm(u32 pressed)
     launchFirm(wantsScreenInit ? 2 : 1, argv);
 }
 
-static inline void mergeSection0(FirmwareType firmType, u32 firmVersion, bool loadFromStorage)
+static int lzss_decompress(u8 *end)
+{
+    unsigned int v1; // r1@2
+    u8 *v2; // r2@2
+    u8 *v3; // r3@2
+    u8 *v4; // r1@2
+    char v5; // r5@4
+    char v6; // t1@4
+    signed int v7; // r6@4
+    int v9; // t1@7
+    u8 *v11; // r3@8
+    int v12; // r12@8
+    int v13; // t1@8
+    int v14; // t1@8
+    unsigned int v15; // r7@8
+    int v16; // r12@8
+    int ret;
+
+    ret = 0;
+    if ( end )
+    {
+        v1 = *((u32 *)end - 2);
+        v2 = &end[*((u32 *)end - 1)];
+        v3 = &end[-(v1 >> 24)];
+        v4 = &end[-(v1 & 0xFFFFFF)];
+        while ( v3 > v4 )
+        {
+            v6 = *(v3-- - 1);
+            v5 = v6;
+            v7 = 8;
+            while ( 1 )
+            {
+                if ( (v7-- < 1) )
+                    break;
+                if ( v5 & 0x80 )
+                {
+                    v13 = *(v3 - 1);
+                    v11 = v3 - 1;
+                    v12 = v13;
+                    v14 = *(v11 - 1);
+                    v3 = v11 - 1;
+                    v15 = ((v14 | (v12 << 8)) & 0xFFFF0FFF) + 2;
+                    v16 = v12 + 32;
+                    do
+                    {
+                        ret = v2[v15];
+                        *(v2-- - 1) = ret;
+                        v16 -= 16;
+                    }
+                    while ( !(v16 < 0) );
+                }
+                else
+                {
+                    v9 = *(v3-- - 1);
+                    ret = v9;
+                    *(v2-- - 1) = v9;
+                }
+                v5 *= 2;
+                if ( v3 <= v4 )
+                    return ret;
+            }
+        }
+    }
+    return ret;
+}
+
+typedef struct CopyKipResult {
+    u32 cxiSize;
+    u8 *codeDstAddr;
+    u32 codeSize;
+} CopyKipResult;
+
+// Copy a KIP, decompressing it in place if necessary (TwlBg)
+static CopyKipResult copyKip(u8 *dst, const u8 *src, u32 maxSize, bool decompress)
+{
+    const char *extModuleSizeError = "Los modulos de FIRM externo son muy grandes.";
+    CopyKipResult res = { 0 };
+    Cxi *dstCxi = (Cxi *)dst;
+    const Cxi *srcCxi = (const Cxi *)src;
+
+    u32 mediaUnitShift = 9 + srcCxi->ncch.flags[6];
+    u32 totalSizeCompressed = srcCxi->ncch.contentSize << mediaUnitShift;
+
+    if (totalSizeCompressed > maxSize)
+        error(extModuleSizeError);
+
+    // First, copy the compressed KIP to the destination
+    memcpy(dst, src, totalSizeCompressed);
+
+    ExHeader *exh = &dstCxi->exHeader;
+    bool isCompressed = (exh->systemControlInfo.flag & 1) != 0;
+    ExeFsHeader *exefs = (ExeFsHeader *)(dst + (dstCxi->ncch.exeFsOffset << mediaUnitShift));
+    ExeFsFileHeader *fh = &exefs->fileHeaders[0];
+    u8 *codeAddr = (u8 *)exefs + sizeof(ExeFsHeader) + fh->offset;
+
+    if (memcmp(fh->name, ".code\0\0\0", 8) != 0 || fh->offset != 0 || exefs->fileHeaders[1].size != 0)
+        error("Un modulo del FIRM externo tiene un formato no valido .");
+
+    // If it's already decompressed or we don't need to, there is not much left to do
+    if (!decompress || !isCompressed)
+    {
+        res.cxiSize = totalSizeCompressed;
+        res.codeDstAddr = codeAddr;
+        res.codeSize = fh->size;
+    }
+    else
+    {
+        u32 codeSize = exh->systemControlInfo.textCodeSet.size;
+        codeSize += exh->systemControlInfo.roCodeSet.size;
+        codeSize += exh->systemControlInfo.dataCodeSet.size;
+
+        u32 codeSizePadded = ((codeSize + (1 << mediaUnitShift) - 1) >> mediaUnitShift) << mediaUnitShift;
+        u32 newTotalSize = (codeAddr + codeSizePadded) - dst;
+        if (newTotalSize > maxSize)
+            error(extModuleSizeError);
+
+        // Decompress in place
+        lzss_decompress(codeAddr + fh->size);
+
+        // Fill padding just in case
+        memset(codeAddr + codeSize, 0, codeSizePadded - codeSize);
+
+        // Fix fields
+        fh->size = codeSize;
+        dstCxi->ncch.exeFsSize = codeSizePadded >> mediaUnitShift;
+        exh->systemControlInfo.flag &= ~1;
+        dstCxi->ncch.contentSize = newTotalSize >> mediaUnitShift;
+
+        res.cxiSize = newTotalSize;
+        res.codeDstAddr = codeAddr;
+        res.codeSize = codeSize;
+    }
+
+    return res;
+}
+static void mergeSection0(FirmwareType firmType, u32 firmVersion, bool loadFromStorage)
 {
     u32 srcModuleSize,
         nbModules = 0;
+
+    bool isLgyFirm = firmType == TWL_FIRM || firmType == AGB_FIRM;
 
     struct
     {
@@ -307,10 +446,11 @@ static inline void mergeSection0(FirmwareType firmType, u32 firmVersion, bool lo
 
     //3) Read or copy the modules
     u8 *dst = firm->section[0].address;
-    const char *extModuleSizeError = "Modulos de FIRM externos muy grandes.";
+    const char *extModuleSizeError = "Los modulos del FIRM externo son muy grandes.";
     // SAFE_FIRM only for N3DS and only if ENABLESAFEFIRMROSALINA is on
-    u32 maxModuleSize = (firmType == NATIVE_FIRM || firmType == SAFE_FIRM) ? 0x80000 : 0x600000;
-    for(u32 i = 0, dstModuleSize; i < nbModules; i++, dst += dstModuleSize, maxModuleSize -= dstModuleSize)
+    u32 maxModuleSize = !isLgyFirm ? 0x80000 : 0x600000;
+    u32 dstModuleSize = 0;
+    for(u32 i = 0; i < nbModules; i++)
     {
         if(loadFromStorage)
         {
@@ -329,24 +469,42 @@ static inline void mergeSection0(FirmwareType firmType, u32 firmVersion, bool lo
                    fileRead(dst, fileName, dstModuleSize) != dstModuleSize ||
                    memcmp(((Cxi *)dst)->ncch.magic, "NCCH", 4) != 0 ||
                    memcmp(moduleList[i].name, ((Cxi *)dst)->exHeader.systemControlInfo.appTitle, sizeof(((Cxi *)dst)->exHeader.systemControlInfo.appTitle)) != 0)
-                    error("Modulo de FIRM externo no valido o esta corrupto.");
+                    error("Modulo del FIRM externo no valido o corrupto.");
 
+                dst += dstModuleSize;
+                maxModuleSize -= dstModuleSize;
                 continue;
             }
         }
 
-        dstModuleSize = moduleList[i].size;
+        // If not successfully loaded from storage, then...
 
-        if(dstModuleSize > maxModuleSize) error(extModuleSizeError);
+        // Decompress stock TwlBg so that we can patch it
+        bool isStockTwlBg = firmType == TWL_FIRM && strcmp(moduleList[i].name, "TwlBg") == 0;
 
-        memcpy(dst, moduleList[i].src, dstModuleSize);
+        CopyKipResult copyRes = copyKip(dst, moduleList[i].src, maxModuleSize, isStockTwlBg);
+
+        if (isStockTwlBg)
+            patchTwlBg(copyRes.codeDstAddr, copyRes.codeSize);
+
+        dst += copyRes.cxiSize;
+        maxModuleSize -= copyRes.cxiSize;
     }
 
-    //4) Patch NATIVE_FIRM/SAFE_FIRM (N3DS) if necessary
-    if(nbModules == 6)
+    //4) Patch kernel to take module size into account
+    u32 newKipSectionSize = dst - firm->section[0].address;
+    u32 oldKipSectionSize = firm->section[0].size;
+    u8 *kernel11Addr = (u8 *)firm + firm->section[1].offset;
+    u32 kernel11Size = firm->section[1].size;
+    if (isLgyFirm)
     {
-        if(patchK11ModuleLoading(firm->section[0].size, dst - firm->section[0].address, (u8 *)firm + firm->section[1].offset, firm->section[1].size) != 0)
-            error("Fallo al inyectar sysmodule personalizado");
+        if (patchK11ModuleLoadingLgy(newKipSectionSize, kernel11Addr, kernel11Size) != 0)
+            error("Fallo al cargar sysmodules");
+    }
+    else
+    {
+        if (patchK11ModuleLoading(oldKipSectionSize, newKipSectionSize, nbModules, kernel11Addr, kernel11Size) != 0)
+            error("Fallo al cargar sysmodules");
     }
 }
 
@@ -469,11 +627,9 @@ u32 patchTwlFirm(u32 firmVersion, bool loadFromStorage, bool doUnitinfoPatch)
     //Apply UNITINFO patch
     if(doUnitinfoPatch) ret += patchUnitInfoValueSet(arm9Section, kernel9Size);
 
-    if(loadFromStorage)
-    {
-        mergeSection0(TWL_FIRM, 0, true);
-        firm->section[0].size = 0;
-    }
+    // Also patch TwlBg here
+    mergeSection0(TWL_FIRM, 0, loadFromStorage);
+    firm->section[0].size = 0;
 
     return ret;
 }

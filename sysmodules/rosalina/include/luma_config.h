@@ -33,12 +33,13 @@
 enum singleOptions
 {
     AUTOBOOTEMU = 0,
-    USEEMUFIRM,
     LOADEXTFIRMSANDMODULES,
     PATCHGAMES,
     REDIRECTAPPTHREADS,
     PATCHVERSTRING,
     SHOWGBABOOT,
+    ENABLEDSIEXTFILTER,
+    ALLOWUPDOWNLEFTRIGHTDSI,
     PATCHUNITINFO,
     DISABLEARM11EXCHANDLERS,
     ENABLESAFEFIRMROSALINA,
@@ -57,3 +58,4 @@ enum multiOptions
 
 void LumaConfig_ConvertComboToString(char *out, u32 combo);
 Result LumaConfig_SaveSettings(void);
+void LumaConfig_RequestSaveSettings(void);

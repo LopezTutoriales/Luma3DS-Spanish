@@ -37,7 +37,14 @@ Result GetSystemInfoHook(s64 *out, s32 type, s32 param)
     {
         case 0x10000:
         {
-            switch(param)
+            if (param >= 0x400 && param < 0x500) {
+                *out = 0;
+                s32 offset = param - 0x400;
+                s32 toCopy = (s32)sizeof(cfwInfo.launchedPath) - offset;
+                if (toCopy > 8) toCopy = 8;
+                memcpy(out, (u8*)cfwInfo.launchedPath + offset, (toCopy > 0) ? toCopy : 0);
+            } 
+            else switch(param)
             {
                 // Please do not use these, except 0, 1, and 0x200
                 // Other types may get removed or reordered without notice
@@ -62,14 +69,15 @@ Result GetSystemInfoHook(s64 *out, s32 type, s32 param)
                 case 6:
                     *out = cfwInfo.splashDurationMsec;
                     break;
-
                 case 0x10:
                     *out = (s64)cfwInfo.autobootTwlTitleId;
                     break;
                 case 0x11:
                     *out = cfwInfo.autobootCtrAppmemtype;
                     break;
-
+                case 0x80:
+                    *out = fcramDescriptor->appRegion.regionSizeInBytes;
+                    break;
                 case 0x100:
                     *out = (s64)cfwInfo.hbldr3dsxTitleId;
                     break;
@@ -109,7 +117,12 @@ Result GetSystemInfoHook(s64 *out, s32 type, s32 param)
                 case 0x10C:
                     *out = (s64)cfwInfo.bottomScreenFilter.invert;
                     break;
-
+                case 0x180:
+                    *out = cfwInfo.pluginLoaderFlags;
+                    break;
+                case 0x181:
+                    *out = disableThreadRedirection;
+                    break;
                 case 0x200: // isRelease
                     *out = cfwInfo.flags & 1;
                     break;
