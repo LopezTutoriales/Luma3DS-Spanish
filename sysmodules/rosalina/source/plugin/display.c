@@ -3,7 +3,7 @@
 #include "draw.h"
 #include <stdio.h>
 
-static const char *__press_b_to_close = "Press [B] to close";
+static const char *__press_b_to_close = "Pulsa B para cerrar";
 
 void    DispMessage(const char *title, const char *message)
 {
@@ -34,7 +34,7 @@ u32    DispErrMessage(const char *title, const char *message, const Result error
 {
     char buf[100];
 
-    sprintf(buf, "Error code: 0x%08lX", error);
+    sprintf(buf, "Codigo de error: 0x%08lX", error);
     menuEnter();
 
     Draw_Lock();

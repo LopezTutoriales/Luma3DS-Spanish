@@ -73,7 +73,7 @@ GDB_DECLARE_XFER_OSDATA_HANDLER(CfwVersion)
         else
             sprintf(versionString, "v%lu.%lu.%lu", GET_VERSION_MAJOR(version), GET_VERSION_MINOR(version), GET_VERSION_REVISION(version));
 
-        sz = (u32)sprintf(buf, (const char *)osdata_cfw_version_template_xml, versionString, commitHash, isRelease ? "Yes" : "No");
+        sz = (u32)sprintf(buf, (const char *)osdata_cfw_version_template_xml, versionString, commitHash, isRelease ? "Si" : "No");
 
         return GDB_SendStreamData(ctx, buf, offset, length, sz, false);
     }

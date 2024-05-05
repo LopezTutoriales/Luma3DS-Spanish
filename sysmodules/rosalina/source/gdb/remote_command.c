@@ -64,7 +64,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(ConvertVAToPA)
         Result r = svcOpenProcess(&process, ctx->pid);
         if(R_FAILED(r))
         {
-            n = sprintf(outbuf, "Invalid process (wtf?)\n");
+            n = sprintf(outbuf, "Proceso no valido (wtf?)\n");
             goto end;
         }
         r = svcControlProcess(process, PROCESSOP_GET_PA_FROM_VA, (u32)&pa, val);
@@ -72,7 +72,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(ConvertVAToPA)
 
         if (R_FAILED(r))
         {
-            n = sprintf(outbuf, "An error occured: %08lX\n", r);
+            n = sprintf(outbuf, "Ocurrio un error: %08lX\n", r);
             goto end;
         }
     }
@@ -97,7 +97,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(SyncRequestInfo)
 
     if(ctx->selectedThreadId == 0)
     {
-        n = sprintf(outbuf, "Cannot run this command without a selected thread.\n");
+        n = sprintf(outbuf, "Imposible usar este comando sin hilo seleccionado.\n");
         goto end;
     }
 
@@ -109,7 +109,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(SyncRequestInfo)
     r = svcOpenProcess(&process, ctx->pid);
     if(R_FAILED(r))
     {
-        n = sprintf(outbuf, "Invalid process (wtf?)\n");
+        n = sprintf(outbuf, "Proceso no valido (wtf?)\n");
         goto end;
     }
 
@@ -119,14 +119,14 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(SyncRequestInfo)
 
     if(R_FAILED(r) || id == MAX_DEBUG_THREAD)
     {
-        n = sprintf(outbuf, "Invalid or running thread.\n");
+        n = sprintf(outbuf, "Hilo invalido o esta ejecutandose.\n");
         goto end;
     }
 
     r = svcReadProcessMemory(&cmdId, ctx->debug, ctx->threadInfos[id].tls + 0x80, 4);
     if(R_FAILED(r))
     {
-        n = sprintf(outbuf, "Invalid or running thread.\n");
+        n = sprintf(outbuf, "Hilo invalido o esta ejecutandose.\n");
         goto end;
     }
 
@@ -142,7 +142,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(SyncRequestInfo)
     if(R_FAILED(r) || ((regs.cpu_registers.cpsr & 0x20) && !(instr == 0xDF32 || (instr == 0xDFFE && regs.cpu_registers.r[12] == 0x32)))
                    || (!(regs.cpu_registers.cpsr & 0x20) && !(instr == 0xEF000032 || (instr == 0xEF0000FE && regs.cpu_registers.r[12] == 0x32))))
     {
-        n = sprintf(outbuf, "The selected thread is not currently performing a sync request (svc 0x32).\n");
+        n = sprintf(outbuf, "El hilo seleccionado no esta haciendo una solicitud de sincr. (svc 0x32).\n");
         goto end;
     }
 
@@ -151,7 +151,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(SyncRequestInfo)
     r = svcCopyHandle(&handle, CUR_PROCESS_HANDLE, (Handle)regs.cpu_registers.r[0], process);
     if(R_FAILED(r))
     {
-        n = sprintf(outbuf, "Invalid handle.\n");
+        n = sprintf(outbuf, "Handle no valido.\n");
         goto end;
     }
 
@@ -221,14 +221,14 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(TranslateHandle)
     r = svcOpenProcess(&process, ctx->pid);
     if(R_FAILED(r))
     {
-        n = sprintf(outbuf, "Invalid process (wtf?)\n");
+        n = sprintf(outbuf, "Proceso no valido (wtf?)\n");
         goto end;
     }
 
     r = svcCopyHandle(&handle, CUR_PROCESS_HANDLE, (Handle)val, process);
     if(R_FAILED(r))
     {
-        n = sprintf(outbuf, "Invalid handle.\n");
+        n = sprintf(outbuf, "Handle no valido.\n");
         goto end;
     }
 
@@ -239,11 +239,11 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(TranslateHandle)
     refcount = (u32)(refcountRaw - 1);
 
     if(serviceBuf[0] != 0)
-        n = sprintf(outbuf, "(%s *)0x%08lx /* %s handle, %lu %s */\n", classBuf, kernelAddr, serviceBuf, refcount, refcount == 1 ? "reference" : "references");
+        n = sprintf(outbuf, "(%s *)0x%08lx /* %s handle, %lu %s */\n", classBuf, kernelAddr, serviceBuf, refcount, refcount == 1 ? "referencia" : "referencias");
     else if (token == TOKEN_KPROCESS)
     {
         svcGetProcessInfo((s64 *)serviceBuf, handle, 0x10000);
-        n = sprintf(outbuf, "(%s *)0x%08lx /* process: %s, %lu %s */\n", classBuf, kernelAddr, serviceBuf, refcount, refcount == 1 ? "reference" : "references");
+        n = sprintf(outbuf, "(%s *)0x%08lx /* proceso: %s, %lu %s */\n", classBuf, kernelAddr, serviceBuf, refcount, refcount == 1 ? "referencia" : "referencias");
     }
     else
     {
@@ -253,9 +253,9 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(TranslateHandle)
         {
             svcGetProcessInfo((s64 *)serviceBuf, (u32)owner, 0x10000);
             svcCloseHandle((u32)owner);
-            sprintf(ownerBuf, " owner: %s", serviceBuf);
+            sprintf(ownerBuf, " propietario: %s", serviceBuf);
         }
-        n = sprintf(outbuf, "(%s *)0x%08lx /* %lu %s%s */\n", classBuf, kernelAddr, refcount, refcount == 1 ? "reference" : "references", ownerBuf);
+        n = sprintf(outbuf, "(%s *)0x%08lx /* %lu %s%s */\n", classBuf, kernelAddr, refcount, refcount == 1 ? "referencia" : "referencias", ownerBuf);
     }
 
 end:
@@ -293,17 +293,17 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(ListAllHandles)
     r = svcOpenProcess(&process, ctx->pid);
     if(R_FAILED(r))
     {
-        n = sprintf(outbuf, "Invalid process (wtf?)\n");
+        n = sprintf(outbuf, "Proceso no valido (wtf?)\n");
         goto end;
     }
 
     if (R_FAILED(count = svcControlProcess(process, PROCESSOP_GET_ALL_HANDLES, (u32)procHandles, val)))
-        n = sprintf(outbuf, "An error occured: %08lX\n", count);
+        n = sprintf(outbuf, "Ocurrio un error: %08lX\n", count);
     else if (count == 0)
-        n = sprintf(outbuf, "Process has no handles ?\n");
+        n = sprintf(outbuf, "Proceso sin handles ?\n");
     else
     {
-        n = sprintf(outbuf, "Found %ld handles.\n", count);
+        n = sprintf(outbuf, "Encontrado(s) %ld handle(s).\n", count);
 
         const char *comma = "";
         for (s32 i = 0; i < count && n < (GDB_BUF_LEN >> 1) - 20; ++i)
@@ -339,7 +339,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(GetMmuConfig)
 
     r = svcOpenProcess(&process, ctx->pid);
     if(R_FAILED(r))
-        n = sprintf(outbuf, "Invalid process (wtf?)\n");
+        n = sprintf(outbuf, "Proceso no valido (wtf?)\n");
     else
     {
         s64 TTBCR, TTBR0;
@@ -370,7 +370,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(GetMemRegions)
 
     if(R_FAILED(svcOpenProcess(&handle, ctx->pid)))
     {
-        posInBuffer = sprintf(outbuf, "Invalid process (wtf?)\n");
+        posInBuffer = sprintf(outbuf, "Proceso no valido (wtf?)\n");
         return GDB_SendHexPacket(ctx, outbuf, posInBuffer);
     }
 
@@ -396,7 +396,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(ToggleExternalMemoryAccess)
 
     ctx->enableExternalMemoryAccess = !ctx->enableExternalMemoryAccess;
 
-    n = sprintf(outbuf, "External memory access %s successfully.\n", ctx->enableExternalMemoryAccess ? "enabled" : "disabled");
+    n = sprintf(outbuf, "Acceso a memoria externa %s con exito.\n", ctx->enableExternalMemoryAccess ? "habilitado" : "deshabilitado");
 
     return GDB_SendHexPacket(ctx, outbuf, n);
 }
@@ -442,7 +442,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(GetThreadPriority)
     int n;
     char outbuf[GDB_BUF_LEN / 2 + 1];
 
-    n = sprintf(outbuf, "Thread (%ld) priority: 0x%02lX\n", ctx->selectedThreadId,
+    n = sprintf(outbuf, "Prioridad hilo (%ld): 0x%02lX\n", ctx->selectedThreadId,
                 GDB_GetDynamicThreadPriority(ctx, ctx->selectedThreadId));
 
     return GDB_SendHexPacket(ctx, outbuf, n);
@@ -452,7 +452,7 @@ GDB_DECLARE_QUERY_HANDLER(Rcmd)
 {
     char commandData[GDB_BUF_LEN / 2 + 1];
     char *endpos;
-    const char *errstr = "Unrecognized command.\n";
+    const char *errstr = "Comando no reconocido.\n";
     u32 len = strlen(ctx->commandData);
 
     if(len == 0 || (len % 2) == 1 || GDB_DecodeHex(commandData, ctx->commandData, len / 2) != len / 2)

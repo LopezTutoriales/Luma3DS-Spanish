@@ -1653,13 +1653,13 @@ static Result Cheat_MapMemoryAndApplyCheat(u32 pid, CheatDescription* const chea
         }
         else
         {
-            sprintf(failureReason, "Debug process failed");
+            sprintf(failureReason, "Proceso de debug fallo");
             svcCloseHandle(processHandle);
         }
     }
     else
     {
-        sprintf(failureReason, "Open process failed");
+        sprintf(failureReason, "Proceso abierto fallo");
     }
     return res;
 }
@@ -2046,14 +2046,14 @@ void RosalinaMenu_Cheats(void)
         do
         {
             Draw_Lock();
-            Draw_DrawString(10, 10, COLOR_TITLE, "Cheats");
+            Draw_DrawString(10, 10, COLOR_TITLE, "Trucos");
             if (titleId == 0)
             {
-                Draw_DrawString(10, 30, COLOR_WHITE, "No suitable title found");
+                Draw_DrawString(10, 30, COLOR_WHITE, "Titulo adecuado no encontrado");
             }
             else
             {
-                Draw_DrawFormattedString(10, 30, COLOR_WHITE, "No cheats found for title %016llX", titleId);
+                Draw_DrawFormattedString(10, 30, COLOR_WHITE, "Trucos no encontrados para %016llX", titleId);
             }
 
             Draw_FlushFramebuffer();
@@ -2074,7 +2074,7 @@ void RosalinaMenu_Cheats(void)
             }
             if (R_SUCCEEDED(r))
             {
-                Draw_DrawFormattedString(10, 10, COLOR_TITLE, "Cheat list");
+                Draw_DrawFormattedString(10, 10, COLOR_TITLE, "Lista de trucos");
 
                 for (s32 i = 0; i < CHEATS_PER_MENU_PAGE && page * CHEATS_PER_MENU_PAGE + i < cheatCount; i++)
                 {

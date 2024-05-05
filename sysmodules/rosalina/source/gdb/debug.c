@@ -307,7 +307,7 @@ GDB_DECLARE_HANDLER(GetStopReason)
 {
     char pidbuf[32];
     if (ctx->multiprocessExtEnabled && ctx->state == GDB_STATE_ATTACHED)
-        sprintf(pidbuf, ";process:%lx", GDB_ConvertFromRealPid(ctx->pid));
+        sprintf(pidbuf, ";proceso:%lx", GDB_ConvertFromRealPid(ctx->pid));
     else
         pidbuf[0] = '\0';
 
@@ -340,7 +340,7 @@ static int GDB_ParseCommonThreadInfo(char *out, GDBContext *ctx, int sig)
     r = svcGetDebugThreadParam(&dummy, &core, ctx->debug, ctx->currentThreadId, DBGTHREAD_PARAMETER_CPU_CREATOR); // Creator = "first ran, and running the thread"
 
     if(R_SUCCEEDED(r))
-        n += sprintf(out + n, "core:%lx;", core);
+        n += sprintf(out + n, "nucleo:%lx;", core);
 
     for(u32 i = 0; i <= 12; i++)
         n += sprintf(out + n, "%lx:%08lx;", i, __builtin_bswap32(regs.cpu_registers.r[i]));
@@ -497,7 +497,7 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
             static const char *processExitReplies[] = { "W00", "X0f", "X0f" };
             char pidbuf[32];
             if (ctx->multiprocessExtEnabled && ctx->state == GDB_STATE_ATTACHED)
-                sprintf(pidbuf, ";process:%lx", GDB_ConvertFromRealPid(ctx->pid));
+                sprintf(pidbuf, ";proceso:%lx", GDB_ConvertFromRealPid(ctx->pid));
             else
                 pidbuf[0] = '\0';
             return GDB_SendFormattedPacket(ctx, "%s%s", processExitReplies[(u32)info->exit_process.reason], pidbuf);
@@ -560,7 +560,7 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
                             const char *kinds[] = { "", "r", "", "a" };
                             WatchpointKind kind = GDB_GetWatchpointKind(ctx, exc.stop_point.fault_information);
                             if(kind == WATCHPOINT_DISABLED)
-                                GDB_SendDebugString(ctx, "Warning: unknown watchpoint encountered!\n");
+                                GDB_SendDebugString(ctx, "Adv: watchpoint desconocido encontrado!\n");
 
                             GDB_ParseCommonThreadInfo(buffer, ctx, SIGTRAP);
                             return GDB_SendFormattedPacket(ctx, "%s%swatch:%08lx;", buffer, kinds[(u32)kind], exc.stop_point.fault_information);

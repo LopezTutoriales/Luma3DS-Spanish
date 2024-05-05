@@ -44,23 +44,23 @@
 #include "luma_config.h"
 
 Menu rosalinaMenu = {
-    "Rosalina menu",
+    "Menu Rosalina",
     {
-        { "Take screenshot", METHOD, .method = &RosalinaMenu_TakeScreenshot },
-        { "Change screen brightness", METHOD, .method = &RosalinaMenu_ChangeScreenBrightness },
-        { "Cheats...", METHOD, .method = &RosalinaMenu_Cheats },
+        { "Hacer una captura de pantalla", METHOD, .method = &RosalinaMenu_TakeScreenshot },
+        { "Cambiar brillo de pantalla", METHOD, .method = &RosalinaMenu_ChangeScreenBrightness },
+        { "Trucos...", METHOD, .method = &RosalinaMenu_Cheats },
         { "", METHOD, .method = PluginLoader__MenuCallback},
-        { "Process list", METHOD, .method = &RosalinaMenu_ProcessList },
-        { "Debugger options...", MENU, .menu = &debuggerMenu },
-        { "System configuration...", MENU, .menu = &sysconfigMenu },
-        { "Screen filters...", MENU, .menu = &screenFiltersMenu },
-        { "New 3DS menu...", MENU, .menu = &N3DSMenu, .visibility = &menuCheckN3ds },
-        { "Miscellaneous options...", MENU, .menu = &miscellaneousMenu },
-        { "Save settings", METHOD, .method = &RosalinaMenu_SaveSettings },
-        { "Power off", METHOD, .method = &RosalinaMenu_PowerOff },
-        { "Reboot", METHOD, .method = &RosalinaMenu_Reboot },
-        { "Credits", METHOD, .method = &RosalinaMenu_ShowCredits },
-        { "Debug info", METHOD, .method = &RosalinaMenu_ShowDebugInfo, .visibility = &rosalinaMenuShouldShowDebugInfo },
+        { "Lista de procesos", METHOD, .method = &RosalinaMenu_ProcessList },
+        { "Opciones del depurador...", MENU, .menu = &debuggerMenu },
+        { "Configuracion de sistema...", MENU, .menu = &sysconfigMenu },
+        { "Filtros de pantalla...", MENU, .menu = &screenFiltersMenu },
+        { "Menu de New 3DS...", MENU, .menu = &N3DSMenu, .visibility = &menuCheckN3ds },
+        { "Opciones miscelaneas...", MENU, .menu = &miscellaneousMenu },
+        { "Guardar configuracion", METHOD, .method = &RosalinaMenu_SaveSettings },
+        { "Apagar", METHOD, .method = &RosalinaMenu_PowerOff },
+        { "Reiniciar", METHOD, .method = &RosalinaMenu_Reboot },
+        { "Creditos", METHOD, .method = &RosalinaMenu_ShowCredits },
+        { "Informacion de depuracion", METHOD, .method = &RosalinaMenu_ShowDebugInfo, .visibility = &rosalinaMenuShouldShowDebugInfo },
         {},
     }
 };
@@ -85,11 +85,11 @@ void RosalinaMenu_SaveSettings(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Save settings");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Guardar configuracion");
         if(R_SUCCEEDED(res))
-            Draw_DrawString(10, 30, COLOR_WHITE, "Operation succeeded.");
+            Draw_DrawString(10, 30, COLOR_WHITE, "Operacion exitosa.");
         else
-            Draw_DrawFormattedString(10, 30, COLOR_WHITE, "Operation failed (0x%08lx).", res);
+            Draw_DrawFormattedString(10, 30, COLOR_WHITE, "Operacion fallida (0x%08lx).", res);
         Draw_FlushFramebuffer();
         Draw_Unlock();
     }
@@ -117,18 +117,18 @@ void RosalinaMenu_ShowDebugInfo(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Rosalina -- Debug info");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Rosalina -- Info de depuracion");
 
         u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, memoryMap);
         posY = Draw_DrawFormattedString(10, posY, COLOR_WHITE, "Kernel ext PA: %08lx - %08lx\n\n", kextPa, kextPa + kextSize);
         posY = Draw_DrawFormattedString(
-            10, posY, COLOR_WHITE, "Kernel version: %lu.%lu-%lu\n",
+            10, posY, COLOR_WHITE, "Version Kernel: %lu.%lu-%lu\n",
             GET_VERSION_MAJOR(kernelVer), GET_VERSION_MINOR(kernelVer), GET_VERSION_REVISION(kernelVer)
         );
         if (mcuFwVersion != 0)
         {
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "MCU FW version: %lu.%lu\n",
+                10, posY, COLOR_WHITE, "Version FW MCU: %lu.%lu\n",
                 GET_VERSION_MAJOR(mcuFwVersion), GET_VERSION_MINOR(mcuFwVersion)
             );
         }
@@ -137,7 +137,7 @@ void RosalinaMenu_ShowDebugInfo(void)
         {
             u32 clkDiv = 1 << (1 + (speedInfo.sdClkCtrl & 0xFF));
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "SDMC speed: HS=%d %lukHz\n",
+                10, posY, COLOR_WHITE, "Velocidad SD: HS=%d %lukHz\n",
                 (int)speedInfo.highSpeedModeEnabled, SYSCLOCK_SDMMC / (1000 * clkDiv)
             );
         }
@@ -145,13 +145,13 @@ void RosalinaMenu_ShowDebugInfo(void)
         {
             u32 clkDiv = 1 << (1 + (speedInfo.sdClkCtrl & 0xFF));
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "NAND speed: HS=%d %lukHz\n",
+                10, posY, COLOR_WHITE, "Velocidad NAND: HS=%d %lukHz\n",
                 (int)speedInfo.highSpeedModeEnabled, SYSCLOCK_SDMMC / (1000 * clkDiv)
             );
         }
         {
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "APPMEMTYPE: %lu\n",
+                10, posY, COLOR_WHITE, "TIPO MEMORIA APP: %lu\n",
                 OS_KernelConfig->app_memtype
             );
         }
@@ -171,22 +171,23 @@ void RosalinaMenu_ShowCredits(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Rosalina -- Luma3DS credits");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Rosalina -- Creditos de Luma3DS");
 
         u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, "Luma3DS (c) 2016-2024 AuroraWright, TuxSH") + SPACING_Y;
 
-        posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "3DSX loading code by fincs");
-        posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Networking code & basic GDB functionality by Stary");
-        posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "InputRedirection by Stary (PoC by ShinyQuagsire)");
+        posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Codigo de carga de 3DSX por fincs");
+        posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Codigo de red y funcionalidad GDB basica por Stary");
+        posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "InputRedirection por Stary (PoC por ShinyQuagsire)");
+		posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Traduccion por Lopez Tutoriales");																					   
 
         posY += 2 * SPACING_Y;
 
         Draw_DrawString(10, posY, COLOR_WHITE,
             (
-                "Special thanks to:\n"
+                "Especial agradecimiento a:\n"
                 "  fincs, WinterMute, mtheall, piepie62,\n"
-                "  Luma3DS contributors, libctru contributors,\n"
-                "  other people"
+                "  Contribuyentes de Luma3DS y de libctru,\n"
+                "  Otras personas"
             ));
 
         Draw_FlushFramebuffer();
@@ -205,8 +206,8 @@ void RosalinaMenu_Reboot(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Reboot");
-        Draw_DrawString(10, 30, COLOR_WHITE, "Press A to reboot, press B to go back.");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Reiniciar");
+        Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para reiniciar, pulsa B para volver.");
         Draw_FlushFramebuffer();
         Draw_Unlock();
 
@@ -239,23 +240,23 @@ void RosalinaMenu_ChangeScreenBrightness(void)
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Screen brightness");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Brillo de pantalla");
         u32 posY = 30;
         posY = Draw_DrawFormattedString(
             10,
             posY,
             COLOR_WHITE,
-            "Current luminance: %lu (min. %lu, max. %lu)\n\n",
+            "Brillo actual: %lu (min. %lu, max. %lu)\n\n",
             luminance,
             minLum,
             maxLum
         );
-        posY = Draw_DrawString(10, posY, COLOR_WHITE, "Controls: Up/Down for +-1, Right/Left for +-10.\n");
-        posY = Draw_DrawString(10, posY, COLOR_WHITE, "Press A to start, B to exit.\n\n");
+        posY = Draw_DrawString(10, posY, COLOR_WHITE, "Controles: Arr/Aba para +-1, Der/Izq para +-10.\n");
+        posY = Draw_DrawString(10, posY, COLOR_WHITE, "Pulsa A para empezar, B para salir.\n\n");
 
-        posY = Draw_DrawString(10, posY, COLOR_RED, "WARNING: \n");
-        posY = Draw_DrawString(10, posY, COLOR_WHITE, "  * value will be limited by the presets.\n");
-        posY = Draw_DrawString(10, posY, COLOR_WHITE, "  * bottom framebuffer will be restored until\nyou exit.");
+        posY = Draw_DrawString(10, posY, COLOR_RED, "ADVERTENCIA: \n");
+        posY = Draw_DrawString(10, posY, COLOR_WHITE, "  * El valor estara limitado por los\najustes preestablecidos.\n");
+        posY = Draw_DrawString(10, posY, COLOR_WHITE, "  * El framebuffer inferior se restaurara\ncuando salgas.");
         Draw_FlushFramebuffer();
         Draw_Unlock();
 
@@ -332,8 +333,8 @@ void RosalinaMenu_PowerOff(void) // Soft shutdown.
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Power off");
-        Draw_DrawString(10, 30, COLOR_WHITE, "Press A to power off, press B to go back.");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Apagar");
+        Draw_DrawString(10, 30, COLOR_WHITE, "Pulsa A para apagar, pulsa B para volver.");
         Draw_FlushFramebuffer();
         Draw_Unlock();
 
@@ -441,19 +442,19 @@ void RosalinaMenu_TakeScreenshot(void)
 
     dateTimeToString(dateTimeStr, osGetTime(), true);
 
-    sprintf(filename, "/luma/screenshots/%s_top.bmp", dateTimeStr);
+    sprintf(filename, "/luma/screenshots/%s_sup.bmp", dateTimeStr);
     TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
     TRY(RosalinaMenu_WriteScreenshot(&file, topWidth, true, true));
     TRY(IFile_Close(&file));
 
-    sprintf(filename, "/luma/screenshots/%s_bot.bmp", dateTimeStr);
+    sprintf(filename, "/luma/screenshots/%s_inf.bmp", dateTimeStr);
     TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
     TRY(RosalinaMenu_WriteScreenshot(&file, bottomWidth, false, true));
     TRY(IFile_Close(&file));
 
     if(is3d && (Draw_GetCurrentFramebufferAddress(true, true) != Draw_GetCurrentFramebufferAddress(true, false)))
     {
-        sprintf(filename, "/luma/screenshots/%s_top_right.bmp", dateTimeStr);
+        sprintf(filename, "/luma/screenshots/%s_sup_der.bmp", dateTimeStr);
         TRY(IFile_Open(&file, archiveId, fsMakePath(PATH_EMPTY, ""), fsMakePath(PATH_ASCII, filename), FS_OPEN_CREATE | FS_OPEN_WRITE));
         TRY(RosalinaMenu_WriteScreenshot(&file, topWidth, true, false));
         TRY(IFile_Close(&file));
@@ -472,17 +473,17 @@ end:
     do
     {
         Draw_Lock();
-        Draw_DrawString(10, 10, COLOR_TITLE, "Screenshot");
+        Draw_DrawString(10, 10, COLOR_TITLE, "Captura de pantalla");
         if(R_FAILED(res))
-            Draw_DrawFormattedString(10, 30, COLOR_WHITE, "Operation failed (0x%08lx).", (u32)res);
+            Draw_DrawFormattedString(10, 30, COLOR_WHITE, "Operacion fallida (0x%08lx).", (u32)res);
         else
         {
             u32 t1 = (u32)(1000 * timeSpentConvertingScreenshot / SYSCLOCK_ARM11);
             u32 t2 = (u32)(1000 * timeSpentWritingScreenshot / SYSCLOCK_ARM11);
             u32 posY = 30;
-            posY = Draw_DrawString(10, posY, COLOR_WHITE, "Operation succeeded.\n\n");
-            posY = Draw_DrawFormattedString(10, posY, COLOR_WHITE, "Time spent converting:    %5lums\n", t1);
-            posY = Draw_DrawFormattedString(10, posY, COLOR_WHITE, "Time spent writing files: %5lums\n", t2);
+            posY = Draw_DrawString(10, posY, COLOR_WHITE, "Operacion exitosa.\n\n");
+            posY = Draw_DrawFormattedString(10, posY, COLOR_WHITE, "Tiempo para conversion:       %5lums\n", t1);
+            posY = Draw_DrawFormattedString(10, posY, COLOR_WHITE, "Tiempo para guardar archivos: %5lums\n", t2);
         }
 
         Draw_FlushFramebuffer();

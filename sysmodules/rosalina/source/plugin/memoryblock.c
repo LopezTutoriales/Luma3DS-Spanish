@@ -77,9 +77,9 @@ Result      MemoryBlock__IsReady(void)
 
     if (R_FAILED(res)) {
         if (isN3DS || (ctx->pluginMemoryStrategy == PLG_STRATEGY_MODE3))
-            PluginLoader__Error("Cannot map plugin memory.", res);
+            PluginLoader__Error("Imposible mapear memoria de plugin.", res);
         else
-            PluginLoader__Error("A console reboot is needed to\nclose extended memory games.\n\nPress [B] to reboot.", res);
+            PluginLoader__Error("Es necesario reiniciar la\nconsola para cerrar los juegos\nde memoria extendida.\n\nPulsa [B] para reiniciar.", res);
         svcKernelSetState(7);
     }
     else
@@ -118,7 +118,7 @@ Result      MemoryBlock__Free(void)
     memblock->memblock = NULL;
 
     if (R_FAILED(res))
-        PluginLoader__Error("Couldn't free memblock", res);
+        PluginLoader__Error("Imposible liberar el\nbloque de memoria", res);
 
     return res;
 }
@@ -140,12 +140,12 @@ Result      MemoryBlock__ToSwapFile(void)
                     fsMakePath(PATH_ASCII, g_swapFileName), FS_OPEN_RWC);
 
     if (R_FAILED(res)) {
-        PluginLoader__Error("CRITICAL: Failed to open swap file.\n\nConsole will now reboot.", res);
+        PluginLoader__Error("CRITICO: Fallo al abrir arch. swap.\n\nLa consola se reiniciara.", res);
         svcKernelSetState(7);
     }
     
     if (!ctx->isSwapFunctionset) {
-        PluginLoader__Error("CRITICAL: Swap save function\nis not set.\n\nConsole will now reboot.", res);
+        PluginLoader__Error("CRITICO: La funcion guardar swap\nno esta configurada.\n\nLa consola se reiniciara.", res);
         svcKernelSetState(7);
     }
     ctx->swapLoadChecksum = saveSwapFunc(memblock->memblock, memblock->memblock + g_memBlockSize, g_loadSaveSwapArgs);
@@ -153,7 +153,7 @@ Result      MemoryBlock__ToSwapFile(void)
     res = IFile_Write(&file, &written, memblock->memblock, toWrite, FS_WRITE_FLUSH);
 
     if (R_FAILED(res) || written != toWrite) {
-        PluginLoader__Error("CRITICAL: Couldn't write swap to SD.\n\nConsole will now reboot.", res);
+        PluginLoader__Error("CRITICO: No se puede escribir swap\na la SD.\n\nLa consola se reiniciara.", res);
         svcKernelSetState(7);
     }
 
@@ -174,14 +174,14 @@ Result      MemoryBlock__FromSwapFile(void)
                     fsMakePath(PATH_ASCII, g_swapFileName), FS_OPEN_READ);
 
     if (R_FAILED(res)) {
-        PluginLoader__Error("CRITICAL: Failed to open swap file.\n\nConsole will now reboot.", res);
+        PluginLoader__Error("CRITICO: Fallo al abrir arch. swap.\n\nLa consola se reiniciara.", res);
         svcKernelSetState(7);
     }
 
     res = IFile_Read(&file, &read, memblock->memblock, toRead);
 
     if (R_FAILED(res) || read != toRead) {
-        PluginLoader__Error("CRITICAL: Couldn't read swap from SD.\n\nConsole will now reboot.", res);
+        PluginLoader__Error("CRITICO: No se puede leer swap\ndesde la SD.\n\nLa consola se reiniciara.", res);
         svcKernelSetState(7);
     }
     
@@ -190,8 +190,8 @@ Result      MemoryBlock__FromSwapFile(void)
     PluginLoaderContext *ctx = &PluginLoaderCtx;
     if (checksum != ctx->swapLoadChecksum) {
         res = -1;
-        PluginLoader__Error("CRITICAL: Swap file is corrupted.\n\nConsole will now reboot.", res);
-        svcKernelSetState(7); 
+        PluginLoader__Error("CRITICO: Archivo swap corrupto.\n\nLa consola se reiniciara.", res);
+        svcKernelSetState(7);
     }
     
     svcFlushDataCacheRange(memblock->memblock, g_memBlockSize);
@@ -211,7 +211,7 @@ Result     MemoryBlock__MountInProcess(void)
     // Executable
     if (R_FAILED((res = svcMapProcessMemoryEx(target, 0x07000000, CUR_PROCESS_HANDLE, (u32)memblock->memblock, header->exeSize))))
     {
-        error->message = "Couldn't map exe memory block";
+        error->message = "Imposible mapear bloque de\nmemoria exe";
         error->code = res;
         return res;
     }
@@ -219,7 +219,7 @@ Result     MemoryBlock__MountInProcess(void)
     // Heap (to be used by the plugin)
     if (R_FAILED((res = svcMapProcessMemoryEx(target, header->heapVA, CUR_PROCESS_HANDLE, (u32)memblock->memblock + header->exeSize, header->heapSize))))
     {
-        error->message = "Couldn't map heap memory block";
+        error->message = "Imposible mapear bloque de\nmemoria de pila";
         error->code = res;
     }
 

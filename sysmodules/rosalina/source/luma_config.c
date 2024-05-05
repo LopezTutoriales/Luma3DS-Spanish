@@ -59,14 +59,14 @@ bool saveSettingsRequest = false;
 void LumaConfig_ConvertComboToString(char *out, u32 combo)
 {
     static const char *keys[] = {
-        "A", "B", "Select", "Start", "Right", "Left", "Up", "Down", "R", "L", "X", "Y",
+        "A", "B", "Select", "Start", "Derecha", "Izquierda", "Arriba", "Abajo", "R", "L", "X", "Y",
         "?", "?",
         "ZL", "ZR",
         "?", "?", "?", "?",
-        "Touch",
+        "Tactil",
         "?", "?", "?",
-        "CStick Right", "CStick Left", "CStick Up", "CStick Down",
-        "CPad Right", "CPad Left", "CPad Up", "CPad Down",
+        "CStick Derecha", "CStick Izquierda", "CStick Arriba", "CStick Abajo",
+        "CPad Derecha", "CPad Izquierda", "CPad Arriba", "CPad Abajo",
     };
 
     char *outOrig = out;
@@ -132,9 +132,9 @@ static size_t LumaConfig_SaveLumaIniConfigToStr(char *out, const CfgData *cfg)
     }
 
     if (GET_VERSION_REVISION(version) != 0) {
-        sprintf(lumaVerStr, "Luma3DS v%d.%d.%d", (int)GET_VERSION_MAJOR(version), (int)GET_VERSION_MINOR(version), (int)GET_VERSION_REVISION(version));
+        sprintf(lumaVerStr, "Luma3DS v%d.%d.%d ESP", (int)GET_VERSION_MAJOR(version), (int)GET_VERSION_MINOR(version), (int)GET_VERSION_REVISION(version));
     } else {
-        sprintf(lumaVerStr, "Luma3DS v%d.%d",  (int)GET_VERSION_MAJOR(version), (int)GET_VERSION_MINOR(version));
+        sprintf(lumaVerStr, "Luma3DS v%d.%d ESP",  (int)GET_VERSION_MAJOR(version), (int)GET_VERSION_MINOR(version));
     }
 
     if (isRelease) {

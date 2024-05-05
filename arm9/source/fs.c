@@ -55,7 +55,7 @@ static bool switchToMainDir(bool isSd)
         {
             if (f_mkdir(mainDir) != FR_OK)
             {
-                error("Failed to create luma directory.");
+                error("Error al crear carpeta de luma.");
                 return false;
             }
             return switchToMainDir(isSd);
@@ -91,7 +91,7 @@ bool remountCtrNandPartition(bool switchMainDir)
         res = f_unmount("nand:");
         if (res != FR_OK)
         {
-            error("f_unmount returned %d", res);
+            error("f_unmount devolvio %d", res);
             return false;
         }
         nandInitialized = false;
@@ -104,7 +104,7 @@ bool remountCtrNandPartition(bool switchMainDir)
         nandInitialized = res == FR_OK;
         if (res != FR_OK)
         {
-            error("f_mount returned %d", res);
+            error("f_mount devolvio %d", res);
         }
     }
 
@@ -322,8 +322,8 @@ bool payloadMenu(char *path, bool *hasDisplayedMenu)
         initScreens();
         *hasDisplayedMenu = true;
 
-        drawString(true, 10, 10, COLOR_TITLE, "Luma3DS chainloader");
-        drawString(true, 10, 10 + SPACING_Y, COLOR_TITLE, "Press A to select, START to quit");
+        drawString(true, 10, 10, COLOR_TITLE, "Luma3DS - Cargador de payloads");
+        drawString(true, 10, 10 + SPACING_Y, COLOR_TITLE, "Pulsa A para seleccionar, START para salir");
 
         for(u32 i = 0, posY = 10 + 3 * SPACING_Y, color = COLOR_RED; i < payloadNum; i++, posY += SPACING_Y)
         {
@@ -511,7 +511,7 @@ bool doLumaUpgradeProcess(void)
         ctrNandLocation = FIRMWARE_SYSNAND;
         if (!remountCtrNandPartition(false))
         {
-            error("failed to mount");
+            error("Error al montar");
             ctrNandLocation = oldCtrNandLocation;
             return false;
         }
@@ -541,7 +541,7 @@ bool doLumaUpgradeProcess(void)
         ctrNandLocation = oldCtrNandLocation;
         ok3 = remountCtrNandPartition(false);
         if (!ok3)
-            error("failed to unmount");
+            error("Error al desmontar");
     }
 #else
     (void)ok3;

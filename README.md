@@ -1,40 +1,40 @@
 # Luma3DS
 
-*Nintendo 3DS "Custom Firmware"*
+*"Custom Firmware" para Nintendo 3DS*
 
-## What it is
-**Luma3DS** is a program patching and reimplementing significant parts of the software running on all models of the Nintendo 3DS family of consoles.
+## Lo que es
+**Luma3DS** es un programa que parchea y reimplementa partes importantes del software que se ejecuta en todos los modelos de la familia de consolas Nintendo 3DS.
 
-It aims at greatly improving the user experience and at supporting the 3DS far beyond its end-of-life. Features include:
+Su objetivo es mejorar enormemente la experiencia del usuario y dar soporte a la 3DS mucho más allá de su fin de vida. Sus características son:
 
-* First class support of 3DSX homebrew
-* An overlay menu called "Rosalina" (triggerable by <kbd>L+Down+Select</kbd> by default), allowing amongst many thing to take screenshots while in-game
-* Removal of restrictions such as the region lock
-* Per-game language settings, asset content path redirection (LayeredFS), game plugins...
-* A fully-fledged GDB stub allowing to debug software (homebrew and system software alike)
-* ... and much more!
+* Soporte de primera clase para homebrew 3DSX
+* Un menú superpuesto llamado "Rosalina" (activable con <kbd>L+Abajo+Select</kbd> por defecto), permitiendo, entre muchas cosas, tomar capturas de pantalla mientras estás en el juego
+* Eliminación de restricciones como el bloqueo de región
+* Configuración de idioma por juego, redirección de ruta de contenido de asset (LayeredFS), plugins de juegos...
+* Un código auxiliar GDB completo que permite depurar software (tanto de homebrew como de sistema)
+* ... y mucho más!
 
-Luma3DS requires a full-system persisent exploit such as [boot9strap](https://github.com/SciresM/boot9strap) to run.
+Luma3DS requiere un exploit persistente en todo el sistema, como [boot9strap](https://github.com/SciresM/boot9strap) para ejecutarse.
 
-## Compiling
+## Compilacion
 
-To build Luma3DS, the following is needed:
+Para compilar Luma3DS, necesitas lo siguiente:
 * git
-* up-to-date devkitARM and libctru
-* [makerom](https://github.com/jakcron/Project_CTR) in PATH
-* [firmtool](https://github.com/TuxSH/firmtool) installed
+* DevkitARM + libctru actualizado
+* [makerom](https://github.com/jakcron/Project_CTR) en PATH
+* [firmtool](https://github.com/TuxSH/firmtool) instalado
 
-The produced `boot.firm` is meant to be copied to the root of your SD card for usage with Boot9Strap.
+El "boot.firm" producido está destinado a ser copiado a la raíz de su tarjeta SD para su uso con Boot9Strap.
 
-## Setup / Usage / Features
-See https://github.com/LumaTeam/Luma3DS/wiki (needs rework)
+## Configuración / Uso / Funciones
+Ver https://github.com/LumaTeam/Luma3DS/wiki (necesita reelaboración)
 
-## Credits
-See https://github.com/LumaTeam/Luma3DS/wiki/Credits (needs rework)
+## Créditos
+Ver https://github.com/LumaTeam/Luma3DS/wiki/Credits (necesita reelaboración)
 
-## Licensing
-This software is licensed under the terms of the GPLv3. You can find a copy of the license in the LICENSE.txt file.
+## Licencia
+Este software tiene licencia según los términos de la GPLv3. Puede encontrar una copia de la licencia en el archivo LICENSE.txt.
 
-Files in the GDB stub are instead triple-licensed as MIT or "GPLv2 or any later version", in which case it's specified in the file header.
+Los archivos en el stub de GDB tienen una licencia triple como MIT o "GPLv2 o cualquier versión posterior", en cuyo caso se especifica en el encabezado del archivo.
 
-By contributing to this repository, you agree to license your changes to the project's owners.
+Al contribuir a este repositorio, acepta otorgar licencias de sus cambios a los propietarios del proyecto.

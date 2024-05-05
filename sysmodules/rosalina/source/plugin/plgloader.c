@@ -14,7 +14,7 @@
 
 #define THREADVARS_MAGIC  0x21545624 // !TV$
 
-static const char *g_title = "Plugin loader";
+static const char *g_title = "Cargador de Plugins";
 PluginLoaderContext PluginLoaderCtx;
 extern u32 g_blockMenuOpen;
 
@@ -66,8 +66,8 @@ void        PluginLoader__UpdateMenu(void)
 {
     static const char *status[2] =
     {
-        "Plugin Loader: [Disabled]",
-        "Plugin Loader: [Enabled]"
+        "Cargador de Plugins: [Deshabilitado]",
+        "Cargador de Plugins: [Habilitado]"
     };
 
     rosalinaMenu.items[3].title = status[PluginLoaderCtx.isEnabled];

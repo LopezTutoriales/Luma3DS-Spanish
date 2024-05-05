@@ -1,10 +1,10 @@
 # 3ds_pm
-Open source replacement of the Arm11 PM system module.
-This is licensed under the MIT license.
+Reemplazo de código abierto del módulo del sistema Arm11 PM.
+Esto está autorizado bajo la licencia MIT.
 
-# Usage
-To run this system module, use a recent release or commit of [Luma3DS](https://github.com/LumaTeam/Luma3DS/), build this project and copy the generated CXI file to `/luma/sysmodules/pm.cxi`.
+# Uso
+Para ejecutar este módulo del sistema, use una versión reciente o confirmación de [Luma3DS](https://github.com/LumaTeam/Luma3DS/), cree este proyecto y copie el archivo CXI generado en `/luma/sysmodules/pm.cxi`.
 
-# Credits
+# Creditos
 @fincs
 @Stary

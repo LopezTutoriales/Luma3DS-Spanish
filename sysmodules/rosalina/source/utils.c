@@ -63,7 +63,7 @@ void formatUserMemoryState(char *outbuf, MemState state)
         "Locked"
     };
 
-    strcpy(outbuf, state > 11 ? "Unknown" : states[state]);
+    strcpy(outbuf, state > 11 ? "Desconocido" : states[state]);
 }
 
 u32 formatMemoryMapOfProcess(char *outbuf, u32 bufLen, Handle handle)
