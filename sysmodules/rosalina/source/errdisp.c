@@ -35,7 +35,7 @@
 extern Handle preTerminationEvent;
 
 static MyThread errDispThread;
-static u8 ALIGN(8) errDispThreadStack[0xD00];
+static u8 CTR_ALIGN(8) errDispThreadStack[0xD00];
 
 static char userString[0x100 + 1] = {0};
 static char staticBuf[sizeof(userString)] = {0};
@@ -145,7 +145,7 @@ static int ERRF_FormatGenericInfo(char *out, const ERRF_FatalErrInfo *info)
     };
 
     static const char *exceptionTypes[] = {
-        "aborto de precarga", "aborto de datos", "instruccion indefinida", "VFP", "invalido"
+        "aborto de prelectura", "aborto de datos", "instruccion indefinida", "VFP", "invalido"
     };
 
     const char *type = (u32)info->type > (u32)ERRF_ERRTYPE_LOG_ONLY ? types[6] : types[(u32)info->type];

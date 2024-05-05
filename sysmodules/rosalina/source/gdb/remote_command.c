@@ -119,14 +119,14 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(SyncRequestInfo)
 
     if(R_FAILED(r) || id == MAX_DEBUG_THREAD)
     {
-        n = sprintf(outbuf, "Hilo invalido o ejecutandose.\n");
+        n = sprintf(outbuf, "Hilo invalido o esta ejecutandose.\n");
         goto end;
     }
 
     r = svcReadProcessMemory(&cmdId, ctx->debug, ctx->threadInfos[id].tls + 0x80, 4);
     if(R_FAILED(r))
     {
-        n = sprintf(outbuf, "Hilo invalido o ejecutandose.\n");
+        n = sprintf(outbuf, "Hilo invalido o esta ejecutandose.\n");
         goto end;
     }
 
@@ -151,7 +151,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(SyncRequestInfo)
     r = svcCopyHandle(&handle, CUR_PROCESS_HANDLE, (Handle)regs.cpu_registers.r[0], process);
     if(R_FAILED(r))
     {
-        n = sprintf(outbuf, "Manejador no valido.\n");
+        n = sprintf(outbuf, "Handle no valido.\n");
         goto end;
     }
 
@@ -228,7 +228,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(TranslateHandle)
     r = svcCopyHandle(&handle, CUR_PROCESS_HANDLE, (Handle)val, process);
     if(R_FAILED(r))
     {
-        n = sprintf(outbuf, "Manejador no valido.\n");
+        n = sprintf(outbuf, "Handle no valido.\n");
         goto end;
     }
 
@@ -239,7 +239,7 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(TranslateHandle)
     refcount = (u32)(refcountRaw - 1);
 
     if(serviceBuf[0] != 0)
-        n = sprintf(outbuf, "(%s *)0x%08lx /* %s manejador, %lu %s */\n", classBuf, kernelAddr, serviceBuf, refcount, refcount == 1 ? "referencia" : "referencias");
+        n = sprintf(outbuf, "(%s *)0x%08lx /* %s handle, %lu %s */\n", classBuf, kernelAddr, serviceBuf, refcount, refcount == 1 ? "referencia" : "referencias");
     else if (token == TOKEN_KPROCESS)
     {
         svcGetProcessInfo((s64 *)serviceBuf, handle, 0x10000);
@@ -300,10 +300,10 @@ GDB_DECLARE_REMOTE_COMMAND_HANDLER(ListAllHandles)
     if (R_FAILED(count = svcControlProcess(process, PROCESSOP_GET_ALL_HANDLES, (u32)procHandles, val)))
         n = sprintf(outbuf, "Ocurrio un error: %08lX\n", count);
     else if (count == 0)
-        n = sprintf(outbuf, "Proceso sin manejador ?\n");
+        n = sprintf(outbuf, "Proceso sin handles ?\n");
     else
     {
-        n = sprintf(outbuf, "Encontrados %ld manejadores.\n", count);
+        n = sprintf(outbuf, "Encontrado(s) %ld handle(s).\n", count);
 
         const char *comma = "";
         for (s32 i = 0; i < count && n < (GDB_BUF_LEN >> 1) - 20; ++i)

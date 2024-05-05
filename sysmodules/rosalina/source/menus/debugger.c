@@ -48,8 +48,8 @@ Menu debuggerMenu = {
 
 static MyThread debuggerSocketThread;
 static MyThread debuggerDebugThread;
-static u8 ALIGN(8) debuggerSocketThreadStack[0x5000];
-static u8 ALIGN(8) debuggerDebugThreadStack[0x3000];
+static u8 CTR_ALIGN(8) debuggerSocketThreadStack[0x5000];
+static u8 CTR_ALIGN(8) debuggerDebugThreadStack[0x3000];
 
 GDBServer gdbServer = { 0 };
 
@@ -174,7 +174,7 @@ void DebuggerMenu_DisableDebugger(void)
     char buf[65];
 
     if(res != 0)
-        sprintf(buf, "Fallo al quitar el depurador (0x%08lx).", (u32)res);
+        sprintf(buf, "Fallo al desactivar el depurador (0x%08lx).", (u32)res);
 
     do
     {

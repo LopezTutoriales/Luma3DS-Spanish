@@ -365,7 +365,7 @@ GDB_DECLARE_QUERY_HANDLER(ThreadExtraInfo)
     if(val == 65)
         sThreadDynamicPriority[0] = 0;
     else
-        sprintf(sThreadDynamicPriority, "prio dinamica: %ld, ", (s32)val);
+        sprintf(sThreadDynamicPriority, "prio. dinamica: %ld, ", (s32)val);
 
     r = svcGetDebugThreadParam(&dummy, &val, ctx->debug, id, DBGTHREAD_PARAMETER_PRIORITY);
     if(R_FAILED(r))

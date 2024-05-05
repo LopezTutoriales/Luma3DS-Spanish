@@ -360,7 +360,7 @@ static CopyKipResult copyKip(u8 *dst, const u8 *src, u32 maxSize, bool decompres
     u8 *codeAddr = (u8 *)exefs + sizeof(ExeFsHeader) + fh->offset;
 
     if (memcmp(fh->name, ".code\0\0\0", 8) != 0 || fh->offset != 0 || exefs->fileHeaders[1].size != 0)
-        error("Un modulo del FIRM externo tiene un formato no valido .");
+        error("Un modulo del FIRM externo tiene un formato no valido.");
 
     // If it's already decompressed or we don't need to, there is not much left to do
     if (!decompress || !isCompressed)
@@ -595,6 +595,11 @@ u32 patchNativeFirm(u32 firmVersion, FirmwareSource nandType, bool loadFromStora
 
 u32 patchTwlFirm(u32 firmVersion, bool loadFromStorage, bool doUnitinfoPatch)
 {
+    u8 *section1 = (u8 *)firm + firm->section[1].offset;
+    u32 section1Size = firm->section[1].size;
+    u8 *section2 = (u8 *)firm + firm->section[2].offset;
+    u32 section2Size = firm->section[2].size;
+
     u8 *arm9Section = (u8 *)firm + firm->section[3].offset;
 
     // Below 3.0, do not actually do anything.
@@ -626,6 +631,8 @@ u32 patchTwlFirm(u32 firmVersion, bool loadFromStorage, bool doUnitinfoPatch)
 
     //Apply UNITINFO patch
     if(doUnitinfoPatch) ret += patchUnitInfoValueSet(arm9Section, kernel9Size);
+
+    ret += patchLgyK11(section1, section1Size, section2, section2Size);
 
     // Also patch TwlBg here
     mergeSection0(TWL_FIRM, 0, loadFromStorage);

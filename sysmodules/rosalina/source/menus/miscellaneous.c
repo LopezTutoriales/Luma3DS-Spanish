@@ -105,7 +105,7 @@ void MiscellaneousMenu_SwitchBoot3dsxTargetTitle(void)
         else
         {
             res = -1;
-            strcpy(failureReason, "proceso adecuado no encontrado");
+            strcpy(failureReason, "Proceso adecuado no encontrado");
         }
     }
     else

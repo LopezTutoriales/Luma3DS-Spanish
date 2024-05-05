@@ -49,18 +49,18 @@ void formatUserMemoryState(char *outbuf, MemState state)
 {
     static const char *states[12] =
     {
-        "Libre",
-        "Reservado",
-        "E/S",
-        "Estatico",
-        "Codigo",
-        "Privado",
-        "Compartido",
-        "Continuo",
-        "Aliado",
+        "Free",
+        "Reserved",
+        "IO",
+        "Static",
+        "Code",
+        "Private",
+        "Shared",
+        "Continuous",
+        "Aliased",
         "Alias",
-        "CodAlias",
-        "Bloqueado"
+        "AliasCode",
+        "Locked"
     };
 
     strcpy(outbuf, state > 11 ? "Desconocido" : states[state]);

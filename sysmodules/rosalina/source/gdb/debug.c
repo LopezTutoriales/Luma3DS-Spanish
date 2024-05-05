@@ -332,7 +332,7 @@ static int GDB_ParseCommonThreadInfo(char *out, GDBContext *ctx, int sig)
 
     char tidbuf[32];
     GDB_EncodeThreadId(ctx, tidbuf, ctx->currentThreadId);
-    int n = sprintf(out, "T%02xhilo:%s;", sig, tidbuf);
+    int n = sprintf(out, "T%02xthread:%s;", sig, tidbuf);
 
     if(R_FAILED(r))
         return n;
@@ -476,7 +476,7 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
             else
             {
                 ctx->currentThreadId = info->thread_id;
-                return GDB_SendPacket(ctx, "T05crear:;", 10);
+                return GDB_SendPacket(ctx, "T05create:;", 10);
             }
         }
 
@@ -552,7 +552,7 @@ int GDB_SendStopReply(GDBContext *ctx, const DebugEventInfo *info)
                             // Use swbreak as a reason for both 'svc 0xFF' and 'bkpt' too (GDB doc mention we should use 'swbreak'
                             // even if the breakpoint was already present/hardcoded).
                             GDB_ParseCommonThreadInfo(buffer, ctx, SIGTRAP);
-                            return GDB_SendFormattedPacket(ctx, "%sswparar:;", buffer);
+                            return GDB_SendFormattedPacket(ctx, "%sswbreak:;", buffer);
                         }
 
                         case STOPPOINT_WATCHPOINT:

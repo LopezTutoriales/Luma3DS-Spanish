@@ -151,7 +151,7 @@ void RosalinaMenu_ShowDebugInfo(void)
         }
         {
             posY = Draw_DrawFormattedString(
-                10, posY, COLOR_WHITE, "Tipo memoria: %lu\n",
+                10, posY, COLOR_WHITE, "TIPO MEMORIA APP: %lu\n",
                 OS_KernelConfig->app_memtype
             );
         }
@@ -173,7 +173,7 @@ void RosalinaMenu_ShowCredits(void)
         Draw_Lock();
         Draw_DrawString(10, 10, COLOR_TITLE, "Rosalina -- Creditos de Luma3DS");
 
-        u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, "Luma3DS (c) 2016-2023 AuroraWright, TuxSH") + SPACING_Y;
+        u32 posY = Draw_DrawString(10, 30, COLOR_WHITE, "Luma3DS (c) 2016-2024 AuroraWright, TuxSH") + SPACING_Y;
 
         posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Codigo de carga de 3DSX por fincs");
         posY = Draw_DrawString(10, posY + SPACING_Y, COLOR_WHITE, "Codigo de red y funcionalidad GDB basica por Stary");
@@ -482,7 +482,7 @@ end:
             u32 t2 = (u32)(1000 * timeSpentWritingScreenshot / SYSCLOCK_ARM11);
             u32 posY = 30;
             posY = Draw_DrawString(10, posY, COLOR_WHITE, "Operacion exitosa.\n\n");
-            posY = Draw_DrawFormattedString(10, posY, COLOR_WHITE, "Tiempo para conversion:    %5lums\n", t1);
+            posY = Draw_DrawFormattedString(10, posY, COLOR_WHITE, "Tiempo para conversion:       %5lums\n", t1);
             posY = Draw_DrawFormattedString(10, posY, COLOR_WHITE, "Tiempo para guardar archivos: %5lums\n", t2);
         }
 

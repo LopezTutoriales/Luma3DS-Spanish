@@ -205,6 +205,19 @@ bool     TryToLoadPlugin(Handle process)
     if (!res && R_FAILED((res = Read_3gx_Header(&plugin, &fileHeader))))
         ctx->error.message = "Imposible leer el arch.";
 
+    // Check compatibility
+    if (!res && fileHeader.infos.compatibility == PLG_COMPAT_EMULATOR) {
+        ctx->error.message = "Plugin compatible solo con emuladores";
+        return false;
+    }
+
+    // Flags
+    if (!res) {
+        ctx->eventsSelfManaged = fileHeader.infos.eventsSelfManaged;
+        if (ctx->pluginMemoryStrategy == PLG_STRATEGY_SWAP && fileHeader.infos.swapNotNeeded)
+            ctx->pluginMemoryStrategy = PLG_STRATEGY_NONE;
+    }
+
     // Set memory region size according to header
     if (!res && R_FAILED((res = MemoryBlock__SetSize(memRegionSizes[fileHeader.infos.memoryRegionSize])))) {
         ctx->error.message = "Imposible establecer el\ntam. de la memoria.";

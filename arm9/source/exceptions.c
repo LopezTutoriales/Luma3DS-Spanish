@@ -61,7 +61,7 @@ void detectAndProcessExceptionDumps(void)
     const vu8 *additionalData = stackDump + dumpHeader->stackDumpSize;
 
     static const char *handledExceptionNames[] = {
-        "FIQ", "instruccion indefinida", "aborto pre-carga", "aborto de datos"
+        "FIQ", "instruccion indefinida", "aborto de prelectura", "aborto de datos"
     },
                       *specialExceptions[] = {
         "panico de Kernel", "svcBreak"
@@ -71,7 +71,7 @@ void detectAndProcessExceptionDumps(void)
         "SP", "LR", "PC", "CPSR", "FPEXC"
     },
                       *faultStatusNames[] = {
-        "Alineacion", "Op. mantenimiento de cache",
+        "Alineacion", "Op. mantenimiento cache instr.",
         "Ext.Aborto traduccion - Lv1", "Ext.Aborto traduccion - Lv2",
         "Traduccion - Seccion", "Traduccion - Pagina", "Bit de acceso - Seccion", "Bit de acceso - Pagina",
         "Dominio - Seccion", "Dominio - Pagina", "Permiso - Seccion", "Permiso - Pagina",
@@ -169,7 +169,7 @@ void detectAndProcessExceptionDumps(void)
             drawFormattedString(false, 10 + 10 * SPACING_X + 3 * i * SPACING_X, posYBottom, COLOR_WHITE, "%02X", *stackDump);
     }
 
-    static const char *choiceMessage[] = {"Pulsa A para dumpear el error", "Pulsa otro boton para apagar"};
+    static const char *choiceMessage[] = {"Pulsa A para guardar el error", "Pulsa otro boton para apagar"};
 
     drawString(true, 10, posY + SPACING_Y, COLOR_WHITE, choiceMessage[0]);
     drawString(true, 10, posY + SPACING_Y + SPACING_Y , COLOR_WHITE, choiceMessage[1]);

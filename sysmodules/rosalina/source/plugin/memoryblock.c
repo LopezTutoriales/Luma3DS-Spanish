@@ -153,7 +153,7 @@ Result      MemoryBlock__ToSwapFile(void)
     res = IFile_Write(&file, &written, memblock->memblock, toWrite, FS_WRITE_FLUSH);
 
     if (R_FAILED(res) || written != toWrite) {
-        PluginLoader__Error("CRITICO: No se puede scribir swap\na la SD.\n\nLa consola se reiniciara.", res);
+        PluginLoader__Error("CRITICO: No se puede escribir swap\na la SD.\n\nLa consola se reiniciara.", res);
         svcKernelSetState(7);
     }
 
@@ -191,7 +191,7 @@ Result      MemoryBlock__FromSwapFile(void)
     if (checksum != ctx->swapLoadChecksum) {
         res = -1;
         PluginLoader__Error("CRITICO: Archivo swap corrupto.\n\nLa consola se reiniciara.", res);
-        svcKernelSetState(7); 
+        svcKernelSetState(7);
     }
     
     svcFlushDataCacheRange(memblock->memblock, g_memBlockSize);
@@ -219,7 +219,7 @@ Result     MemoryBlock__MountInProcess(void)
     // Heap (to be used by the plugin)
     if (R_FAILED((res = svcMapProcessMemoryEx(target, header->heapVA, CUR_PROCESS_HANDLE, (u32)memblock->memblock + header->exeSize, header->heapSize))))
     {
-        error->message = "Imposible mapear bloque de\nmemoria del monton";
+        error->message = "Imposible mapear bloque de\nmemoria de pila";
         error->code = res;
     }
 

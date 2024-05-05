@@ -432,7 +432,7 @@ static void ProcessListMenu_MemoryViewer(const ProcessInfo *info)
                 const u32 infoY = instructionsY + SPACING_Y;
                 viewerY += SPACING_Y;
                 if(codeAvailable && heapAvailable)
-                {    
+                {
                     Draw_DrawString(10, infoY, COLOR_WHITE, "Pulsar L o R alternara entre pila y codigo.");
                     if((u32)menus[MENU_MODE_NORMAL].buf == heapDestAddress)
                         Draw_DrawString(10 + SPACING_X * 29, infoY, COLOR_GREEN, "pila");

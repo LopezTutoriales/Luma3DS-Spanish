@@ -39,6 +39,7 @@
 #include "pin.h"
 #include "i2c.h"
 #include "ini.h"
+#include "firm.h"
 
 #include "config_template_ini.h" // note that it has an extra NUL byte inserted
 
@@ -64,12 +65,11 @@ static const char *singleOptionIniNamesBoot[] = {
     "app_syscore_threads_on_core_2",
     "show_system_settings_string",
     "show_gba_boot_screen",
-    "enable_dsi_external_filter",
-    "allow_updown_leftright_dsi",
 };
 
 static const char *singleOptionIniNamesMisc[] = {
     "use_dev_unitinfo",
+    "enable_dsi_external_filter",
     "disable_arm11_exception_handlers",
     "enable_safe_firm_rosalina",
 };
@@ -483,7 +483,7 @@ static int configIniHandler(void* user, const char* section, const char* name, c
             return 1;
         } else if (strcmp(name, "screen_filters_top_gamma") == 0) {
             s64 opt;
-            CHECK_PARSE_OPTION(parseDecFloatOption(&opt, value, 0, 1411 * FLOAT_CONV_MULT));
+            CHECK_PARSE_OPTION(parseDecFloatOption(&opt, value, 0, 8 * FLOAT_CONV_MULT));
             cfg->topScreenFilter.gammaEnc = opt;
             return 1;
         } else if (strcmp(name, "screen_filters_top_contrast") == 0) {
@@ -508,7 +508,7 @@ static int configIniHandler(void* user, const char* section, const char* name, c
             return 1;
         } else if (strcmp(name, "screen_filters_bot_gamma") == 0) {
             s64 opt;
-            CHECK_PARSE_OPTION(parseDecFloatOption(&opt, value, 0, 1411 * FLOAT_CONV_MULT));
+            CHECK_PARSE_OPTION(parseDecFloatOption(&opt, value, 0, 8 * FLOAT_CONV_MULT));
             cfg->bottomScreenFilter.gammaEnc = opt;
             return 1;
         } else if (strcmp(name, "screen_filters_bot_contrast") == 0) {
@@ -566,6 +566,11 @@ static int configIniHandler(void* user, const char* section, const char* name, c
             } else {
                 CHECK_PARSE_OPTION(-1);
             }
+        } else if (strcmp(name, "volume_slider_override") == 0) {
+            s64 opt;
+            CHECK_PARSE_OPTION(parseDecIntOption(&opt, value, -1, 100));
+            cfg->volumeSliderOverride = (s8)opt;
+            return 1;
         } else {
             CHECK_PARSE_OPTION(-1);
         }
@@ -651,7 +656,6 @@ static size_t saveLumaIniConfigToStr(char *out)
         (int)CONFIG(AUTOBOOTEMU), (int)CONFIG(LOADEXTFIRMSANDMODULES),
         (int)CONFIG(PATCHGAMES), (int)CONFIG(REDIRECTAPPTHREADS),
         (int)CONFIG(PATCHVERSTRING), (int)CONFIG(SHOWGBABOOT),
-        (int)CONFIG(ENABLEDSIEXTFILTER), (int)CONFIG(ALLOWUPDOWNLEFTRIGHTDSI),
 
         1 + (int)MULTICONFIG(DEFAULTEMU), 4 - (int)MULTICONFIG(BRIGHTNESS),
         splashPosStr, (unsigned int)cfg->splashDurationMsec,
@@ -670,9 +674,10 @@ static size_t saveLumaIniConfigToStr(char *out)
         cfg->autobootTwlTitleId, (int)cfg->autobootCtrAppmemtype,
 
         forceAudioOutputStr,
+        cfg->volumeSliderOverride,
 
-        (int)CONFIG(PATCHUNITINFO), (int)CONFIG(DISABLEARM11EXCHANDLERS),
-        (int)CONFIG(ENABLESAFEFIRMROSALINA)
+        (int)CONFIG(PATCHUNITINFO), (int)CONFIG(ENABLEDSIEXTFILTER),
+        (int)CONFIG(DISABLEARM11EXCHANDLERS), (int)CONFIG(ENABLESAFEFIRMROSALINA)
     );
 
     return n < 0 ? 0 : (size_t)n;
@@ -774,6 +779,7 @@ bool readConfig(void)
         configData.formatVersionMinor = CONFIG_VERSIONMINOR;
         configData.config |= 1u << PATCHVERSTRING;
         configData.splashDurationMsec = 3000;
+        configData.volumeSliderOverride = -1;
         configData.hbldr3dsxTitleId = HBLDR_DEFAULT_3DSX_TID;
         configData.rosalinaMenuCombo = 1u << 9 | 1u << 7 | 1u << 2; // L+Start+Select
         configData.topScreenFilter.cct = 6500; // default temp, no-op
@@ -826,16 +832,15 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                              };
 
     static const char *singleOptionsText[] = { "( ) Autoiniciar EmuNAND",
-                                               "( ) Habilitar cargar modulos y FIRMs externos",
+                                               "( ) Habilitar carga de modulos y FIRMs externos",
                                                "( ) Habilitar parcheo de juegos",
                                                "( ) Redirigir procesos de syscore apps al core2",
                                                "( ) Mostrar NAND o texto personalizado en Conf.",
                                                "( ) Mostrar Boot de GBA en AGB_FIRM parcheado",
-                                               "( ) Usar filtros de mejora personal. para DSi",
-                                               "( ) Permitir combos Izq+Der / Arr+Aba para DSi",
 
-                                               // Should always be the last entry
-                                               "\nGuardar y salir"
+                                               // Should always be the last 2 entries
+                                               "\nIniciar cargador de payloads",
+                                               "Guardar y salir"
                                              };
 
     static const char *optionsDescription[]  = { "Seleccionar EmuNAND por defecto.\n\n"
@@ -883,7 +888,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "Si esta habilitado, se lanzara una\n"
                                                  "EmuNAND al arrancar.\n\n"
                                                  "En caso contrario, se lanzara SysNAND.\n\n"
-                                                 "Manten L al arrancar para cambiar NAND.\n\n"
+                                                 "Manten L al arrancar para cambiar NAND\n\n"
                                                  "Para usar una EmuNAND diferente de la\n"
                                                  "predeterminada, manten la cruceta\n"
                                                  "(Arriba/Derecha/Abajo/Izquierda es\n"
@@ -913,7 +918,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "alrededor de un 10%. Puede romper\n"
                                                  "algunos juegos y otras aplicaciones.\n",
 
-                                                 "Muestra la NAND/FIRM actual:\n\n"
+                                                 "Muestra la NAND actual:\n\n"
                                                  "\t* Sys  = SysNAND\n"
                                                  "\t* Emu  = EmuNAND 1\n"
                                                  "\t* EmuX = EmuNAND X\n"
@@ -924,20 +929,15 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                                  "Muestra la pantalla de arranque de GBA\n"
                                                  "cuando se lanzan juegos de GBA.",
 
-                                                 "Habilita reemplazar el filtro de\n"
-                                                 "escalado por defecto usado por el\n"
-                                                 "software de DS(i) por el contenido en:\n\n"
-                                                 "/luma/twl_upscaling_filter.bin\n\n"
-                                                 "(Consultar la wiki para detalles)",
+                                                // Should always be the last 2 entries
+                                                "Inicia el menu de cargador de payloads\n"
+												"de Luma3DS.\n\n"
+												"Si dispones de un solo payload dentro\n"
+												"de 'luma/payloads/' (como por ejemplo\n"
+												"'GodMode9.firm'), este arrancara\n"
+												"automaticamente sin salir el menu de\n"
+												"cargador de payloads de Luma3DS",
 
-                                                 "Permite combos de Izquierda+Derecha y\n"
-                                                 "Arriba+Abajo (usando la cruceta y el\n"
-                                                 "Circle PAD simultaneamente) en el\n"
-												 "software de DS(i).\n\n"
-                                                 "El software comercial filtra estos\n"
-                                                 "combos por su cuenta.",
-                                                
-                                                 // Should always be the last entry
                                                  "Guarde los cambios y salga de este\n"
                                                  "menu. Para descartar los cambios pulse\n"
                                                  "el boton POWER. Usa START como acceso\n"
@@ -981,7 +981,6 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
         { .visible = true },
         { .visible = true },
         { .visible = true },
-        { .visible = true },
     };
 
     //Calculate the amount of the various kinds of options and pre-select the first single one
@@ -1014,7 +1013,7 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                                        "FIRM1" };
 
     drawString(true, 10, 10, COLOR_TITLE, CONFIG_TITLE);
-    drawString(true, 10, 10 + SPACING_Y, COLOR_TITLE, "Pulsa A para seleccionar, START para guardar");
+    drawString(true, 10, 10 + SPACING_Y, COLOR_TITLE, "Usa la cruceta y A para cambiar los ajustes");
     drawFormattedString(false, 10, SCREEN_HEIGHT - 3 * SPACING_Y, COLOR_YELLOW, "Arrancado desde %s via %s", isSdMode ? "SD" : "CTRNAND", bootTypes[(u32)bootType]);
 	drawString(false, 10, SCREEN_HEIGHT - 2 * SPACING_Y, COLOR_YELLOW, "Traducido por Lopez Tutoriales");
 	drawString(false, 10, SCREEN_HEIGHT - 1 * SPACING_Y, COLOR_YELLOW, "https://github.com/LopezTutoriales/");
@@ -1054,13 +1053,13 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
     }
 
     drawString(false, 10, 10, COLOR_WHITE, optionsDescription[selectedOption]);
-    
+
     bool startPressed = false;
     //Boring configuration menu
     while(true)
     {
         u32 pressed = 0;
-        if (!startPressed) 
+        if (!startPressed)
         do
         {
             pressed = waitInput(true) & MENU_BUTTONS;
@@ -1068,9 +1067,10 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
         while(!pressed);
 
         // Force the selection of "save and exit" and trigger it.
-        if(pressed & BUTTON_START) 
+        if(pressed & BUTTON_START)
         {
             startPressed = true;
+            // This moves the cursor to the last entry
             pressed = BUTTON_RIGHT;
         }
 
@@ -1158,6 +1158,10 @@ void configMenu(bool oldPinStatus, u32 oldPinMode)
                 {
                     drawString(true, 10, singleOptions[singleSelected].posY, COLOR_GREEN, singleOptionsText[singleSelected]);
                     startPressed = false;
+                    break;
+                }
+                else if (singleSelected == singleOptionsAmount - 2) {
+                    loadHomebrewFirm(0);
                     break;
                 }
                 else

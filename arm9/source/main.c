@@ -136,7 +136,7 @@ void main(int argc, char **argv, u32 magicWord)
     mcuFwVersion = ((u16)mcuFwVerHi << 16) | mcuFwVerLo;
 
     // Check if fw is older than factory. See https://www.3dbrew.org/wiki/MCU_Services#MCU_firmware_versions for a table
-    if (mcuFwVerHi < 1) error("Version de FW MCU %d.%d. no soportada", (int)mcuFwVerHi, (int)mcuFwVerLo);
+    if (mcuFwVerHi < 1) error("Version de FW MCU %d.%d no soportada.", (int)mcuFwVerHi, (int)mcuFwVerLo);
 
     I2C_readRegBuf(I2C_DEV_MCU, 0x7F, mcuConsoleInfo, 9);
 

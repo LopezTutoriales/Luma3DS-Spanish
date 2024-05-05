@@ -4,7 +4,7 @@
 
 #define _3GX_MAGIC (0x3230303024584733) /* "3GX$0002" */
 
-typedef struct PACKED
+typedef struct CTR_PACKED
 {
     u32             authorLen;
     const char*     authorMsg;
@@ -20,7 +20,10 @@ typedef struct PACKED
             u32     embeddedExeLoadFunc : 1;
             u32     embeddedSwapSaveLoadFunc : 1;
             u32     memoryRegionSize : 2;
-            u32     unused : 28;
+            u32     compatibility : 2;
+            u32     eventsSelfManaged : 1;
+            u32     swapNotNeeded : 1;
+            u32     unused : 24;
         };
     };
     u32             exeLoadChecksum;
@@ -28,20 +31,20 @@ typedef struct PACKED
     u32             builtInSwapSaveLoadArgs[4];
 } _3gx_Infos;
 
-typedef struct PACKED
+typedef struct CTR_PACKED
 {
     u32             count;
     u32           * titles;
 }   _3gx_Targets;
 
-typedef struct PACKED
+typedef struct CTR_PACKED
 {
     u32             nbSymbols;
     u32             symbolsOffset;
     u32             nameTableOffset;
 }   _3gx_Symtable;
 
-typedef struct PACKED
+typedef struct CTR_PACKED
 {
     u32             codeOffset;
     u32             rodataOffset;
@@ -55,7 +58,7 @@ typedef struct PACKED
     u32             swapLoadFuncOffset; // NOP terminated
 } _3gx_Executable;
 
-typedef struct PACKED
+typedef struct CTR_PACKED
 {
     u64             magic;
     u32             version;
@@ -66,6 +69,12 @@ typedef struct PACKED
     _3gx_Symtable   symtable;
 } _3gx_Header;
 
+
+enum _3gx_Compatibility {
+    PLG_COMPAT_CONSOLE = 0,
+    PLG_COMPAT_EMULATOR = 1,
+    PLG_COMPAT_CONSOLE_EMULATOR = 2,
+};
 
 Result  Check_3gx_Magic(IFile *file);
 Result  Read_3gx_Header(IFile *file, _3gx_Header *header);
