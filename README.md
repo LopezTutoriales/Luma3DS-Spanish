@@ -5,8 +5,8 @@
 
 *"Custom Firmware" para Nintendo 3DS*
 
-![Captura Menu de Configuracion](img/boot_menu_v133.png)
-![Captura Menu de Rosalina](img/rosalina_menu_v133.png)
+![Captura Menu de Configuracion](img/boot_menu_v1333.png)
+![Captura Menu de Rosalina](img/rosalina_menu_v1333.png)
 
 ## Descripción
 **Luma3DS** parchea y reimplementa partes importantes del software del sistema que se ejecuta en todos los modelos de la familia de consolas Nintendo 3DS. Su objetivo es mejorar enormemente la experiencia del usuario y darle soporte a la 3DS mucho más allá de su fin de vida.
